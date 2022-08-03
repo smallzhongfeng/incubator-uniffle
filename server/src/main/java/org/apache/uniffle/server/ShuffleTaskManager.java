@@ -99,13 +99,12 @@ public class ShuffleTaskManager {
     this.commitCheckIntervalMax = conf.getLong(ShuffleServerConf.SERVER_COMMIT_CHECK_INTERVAL_MAX);
     this.preAllocationExpired = conf.getLong(ShuffleServerConf.SERVER_PRE_ALLOCATION_EXPIRED);
     // the thread for checking application status
-    this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(
-        ThreadUtils.getThreadFactory("checkResource-%d"));
+    this.scheduledExecutorService = ThreadUtils.getSingleScheduledExecutorService("checkResource-%d");
     scheduledExecutorService.scheduleAtFixedRate(
         () -> preAllocatedBufferCheck(), preAllocationExpired / 2,
         preAllocationExpired / 2, TimeUnit.MILLISECONDS);
-    this.expiredAppCleanupExecutorService = Executors.newSingleThreadScheduledExecutor(
-        ThreadUtils.getThreadFactory("expiredAppCleaner"));
+    this.expiredAppCleanupExecutorService =
+        ThreadUtils.getSingleScheduledExecutorService("expiredAppCleaner-%d");
     expiredAppCleanupExecutorService.scheduleAtFixedRate(
         () -> checkResourceStatus(), appExpiredWithoutHB / 2,
         appExpiredWithoutHB / 2, TimeUnit.MILLISECONDS);

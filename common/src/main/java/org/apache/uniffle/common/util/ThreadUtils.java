@@ -17,6 +17,9 @@
 
 package org.apache.uniffle.common.util;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -28,5 +31,17 @@ public class ThreadUtils {
 
   public static ThreadFactory getThreadFactory(String factoryName) {
     return new ThreadFactoryBuilder().setDaemon(true).setNameFormat(factoryName).build();
+  }
+
+  public static ScheduledExecutorService getSingleScheduledExecutorService(String factoryName) {
+    return Executors.newSingleThreadScheduledExecutor(getThreadFactory(factoryName));
+  }
+
+  public static ExecutorService getFixedThreadPool(int num, String factoryName) {
+    return Executors.newFixedThreadPool(num, getThreadFactory(factoryName));
+  }
+
+  public static ExecutorService getCachedThreadPool(String factoryName) {
+    return Executors.newCachedThreadPool(getThreadFactory(factoryName));
   }
 }

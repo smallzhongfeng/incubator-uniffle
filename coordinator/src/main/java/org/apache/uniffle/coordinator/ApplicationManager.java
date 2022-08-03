@@ -58,8 +58,7 @@ public class ApplicationManager {
   public ApplicationManager(CoordinatorConf conf) {
     expired = conf.getLong(CoordinatorConf.COORDINATOR_APP_EXPIRED);
     // the thread for checking application status
-    scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(
-        ThreadUtils.getThreadFactory("ApplicationManager-%d"));
+    scheduledExecutorService = ThreadUtils.getSingleScheduledExecutorService("ApplicationManager-%d");
     scheduledExecutorService.scheduleAtFixedRate(
         () -> statusCheck(), expired / 2, expired / 2, TimeUnit.MILLISECONDS);
   }

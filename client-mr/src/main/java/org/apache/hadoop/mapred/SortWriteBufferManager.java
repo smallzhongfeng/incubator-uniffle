@@ -137,9 +137,7 @@ public class SortWriteBufferManager<K, V> {
     this.isMemoryShuffleEnabled = isMemoryShuffleEnabled;
     this.sendThreshold = sendThreshold;
     this.maxBufferSize = maxBufferSize;
-    this.sendExecutorService  = Executors.newFixedThreadPool(
-        sendThreadNum,
-        ThreadUtils.getThreadFactory("send-thread-%d"));
+    this.sendExecutorService  = ThreadUtils.getFixedThreadPool(sendThreadNum, "send-thread-%d");
   }
 
   // todo: Single Buffer should also have its size limit
@@ -321,7 +319,7 @@ public class SortWriteBufferManager<K, V> {
   }
 
   protected void sendCommit() {
-    ExecutorService executor = Executors.newSingleThreadExecutor();
+    ExecutorService executor = ThreadUtils.getSingleScheduledExecutorService("sendCommit-thread-%d");
     Set<ShuffleServerInfo> serverInfos = Sets.newHashSet();
     for (List<ShuffleServerInfo> serverInfoLists : partitionToServers.values()) {
       for (ShuffleServerInfo serverInfo : serverInfoLists) {

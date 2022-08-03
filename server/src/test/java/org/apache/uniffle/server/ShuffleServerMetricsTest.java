@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,6 +32,7 @@ import org.junit.jupiter.api.Test;
 
 import org.apache.uniffle.common.RemoteStorageInfo;
 import org.apache.uniffle.common.metrics.TestUtils;
+import org.apache.uniffle.common.util.ThreadUtils;
 import org.apache.uniffle.storage.common.LocalStorage;
 import org.apache.uniffle.storage.util.StorageType;
 
@@ -150,7 +150,7 @@ public class ShuffleServerMetricsTest {
 
   @Test
   public void testServerMetricsConcurrently() throws Exception {
-    ExecutorService executorService = Executors.newFixedThreadPool(3);
+    ExecutorService executorService = ThreadUtils.getFixedThreadPool(3, "testServerMetricsConcurrently-%d");
     List<Callable<Void>> calls = new ArrayList<>();
     ShuffleServerMetrics.gaugeBufferDataSize.set(0);
 

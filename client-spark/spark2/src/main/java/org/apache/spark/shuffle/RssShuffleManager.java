@@ -187,8 +187,7 @@ public class RssShuffleManager implements ShuffleManager {
           ThreadUtils.getThreadFactory("SendData"));
 
       if (isDriver) {
-        heartBeatScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(
-            ThreadUtils.getThreadFactory("rss-heartbeat-%d"));
+        heartBeatScheduledExecutorService = ThreadUtils.getSingleScheduledExecutorService("rss-heartbeat-%d");
       }
     }
   }

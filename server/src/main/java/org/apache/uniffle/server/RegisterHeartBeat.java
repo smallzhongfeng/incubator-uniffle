@@ -20,7 +20,6 @@ package org.apache.uniffle.server;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +34,7 @@ import org.apache.uniffle.client.factory.CoordinatorClientFactory;
 import org.apache.uniffle.client.request.RssSendHeartBeatRequest;
 import org.apache.uniffle.client.response.ResponseStatusCode;
 import org.apache.uniffle.client.response.RssSendHeartBeatResponse;
+import org.apache.uniffle.common.util.ThreadUtils;
 
 public class RegisterHeartBeat {
 
@@ -45,7 +45,7 @@ public class RegisterHeartBeat {
   private final ShuffleServer shuffleServer;
   private final String coordinatorQuorum;
   private final List<CoordinatorClient> coordinatorClients;
-  private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+  private final ScheduledExecutorService service = ThreadUtils.getSingleScheduledExecutorService("startHeartBeat-%d");
   private final ExecutorService heartBeatExecutorService;
   private long heartBeatTimeout;
 
@@ -59,8 +59,8 @@ public class RegisterHeartBeat {
         new CoordinatorClientFactory(conf.getString(ShuffleServerConf.RSS_CLIENT_TYPE));
     this.coordinatorClients = factory.createCoordinatorClient(this.coordinatorQuorum);
     this.shuffleServer = shuffleServer;
-    this.heartBeatExecutorService = Executors.newFixedThreadPool(
-        conf.getInteger(ShuffleServerConf.SERVER_HEARTBEAT_THREAD_NUM));
+    this.heartBeatExecutorService = ThreadUtils.getFixedThreadPool(
+        conf.getInteger(ShuffleServerConf.SERVER_HEARTBEAT_THREAD_NUM), "sendHeartBeat-%d");
   }
 
   public void startHeartBeat() {
