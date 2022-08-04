@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://DClusterRSSmix</value>
+    </property>
+    <property>
+        <name>fs.trash.interval</name>
+        <value>10080</value>
+    </property>
+    <property>
+        <name>hadoop.tmp.dir</name>
+        <value>/home/hadoop/cluster-data</value>
+    </property>
+    <property>
+        <name>io.file.buffer.size</name>
+        <value>65536</value>
+    </property>
+    <property>
+        <name>ipc.server.listen.queue.size</name>
+        <value>32768</value>
+    </property>
+    <property>
+        <name>ipc.server.read.threadpool.size</name>
+        <value>5</value>
+    </property>
+    <property>
+        <name>dfs.userhint.split.key</name>
+        <value>##</value>
+    </property>
+</configuration>

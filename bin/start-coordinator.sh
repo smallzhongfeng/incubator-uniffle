@@ -26,6 +26,8 @@ COORDINATOR_HOME="$(
 )"
 CONF_FILE="./conf/coordinator.conf "
 MAIN_CLASS="org.apache.uniffle.coordinator.CoordinatorServer"
+export HADOOP_USER_NAME=hadoop
+export HADOOP_USER_PASSWORD=hadoopnmg
 
 cd $COORDINATOR_HOME
 
@@ -83,6 +85,6 @@ else
   exit 1
 fi
 
-$RUNNER $ARGS $JVM_ARGS -cp $CLASSPATH $MAIN_CLASS --conf $CONF_FILE $@ &
+$RUNNER $ARGS $JVM_ARGS -cp $CLASSPATH $MAIN_CLASS --conf $CONF_FILE $@ > logs/start.log 2>&1 &
 
 echo $! >$COORDINATOR_HOME/currentpid

@@ -20,9 +20,9 @@
 set -o pipefail
 set -e
 
-JAVA_HOME=<java_home_dir>
-HADOOP_HOME=<hadoop_home_dir>
-XMX_SIZE="80g"
+JAVA_HOME=/usr/local/jdk1.8.0_77
+HADOOP_HOME=/home/hadoop/hadoop-current
+XMX_SIZE="30g"
 
 RUNNER="${JAVA_HOME}/bin/java"
 JPS="${JAVA_HOME}/bin/jps"
