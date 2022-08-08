@@ -29,6 +29,8 @@ cd $SHUFFLE_SERVER_HOME
 
 source "${SHUFFLE_SERVER_HOME}/bin/rss-env.sh"
 source "${SHUFFLE_SERVER_HOME}/bin/utils.sh"
+export HADOOP_USER_NAME=prod_bigdata_qa
+export HADOOP_USER_PASSWORD=CBRZSE5iwS05k1CmFdwTIkw3M5q6lswv
 
 if [ -z "$HADOOP_HOME" ]; then
   echo "No env HADOOP_HOME."
@@ -98,6 +100,6 @@ else
   exit 1
 fi
 
-$RUNNER $ARGS $JVM_ARGS $JAVA_LIB_PATH -cp $CLASSPATH $MAIN_CLASS --conf $CONF_FILE $@ &
+$RUNNER $ARGS $JVM_ARGS $JAVA_LIB_PATH -cp $CLASSPATH $MAIN_CLASS --conf $CONF_FILE $@ > logs/start.log 2>&1 &
 
 echo $! >$SHUFFLE_SERVER_HOME/currentpid
