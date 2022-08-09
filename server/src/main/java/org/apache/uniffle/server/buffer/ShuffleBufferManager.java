@@ -50,6 +50,8 @@ public class ShuffleBufferManager {
   private static final Logger LOG = LoggerFactory.getLogger(ShuffleBufferManager.class);
 
   private final ShuffleFlushManager shuffleFlushManager;
+  private boolean bufferFlushEnabled;
+  private long bufferFlushThreshold;
   private long capacity;
   private long readCapacity;
   private int retryNum;
@@ -76,6 +78,9 @@ public class ShuffleBufferManager {
         * conf.get(ShuffleServerConf.SERVER_MEMORY_SHUFFLE_HIGHWATERMARK_PERCENTAGE));
     this.lowWaterMark = (long)(capacity / 100
         * conf.get(ShuffleServerConf.SERVER_MEMORY_SHUFFLE_LOWWATERMARK_PERCENTAGE));
+    this.bufferFlushEnabled = conf.getBoolean(ShuffleServerConf.BUFFER_FLUSH_ENABLED);
+    this.bufferFlushThreshold = conf.getLong(ShuffleServerConf.BUFFER_FLUSH_THRESHOLD);
+
   }
 
   public StatusCode registerBuffer(String appId, int shuffleId, int startPartition, int endPartition) {
@@ -112,6 +117,9 @@ public class ShuffleBufferManager {
     updateSize(size, isPreAllocated);
     updateShuffleSize(appId, shuffleId, size);
     synchronized (this) {
+      Range<Integer> partitionRange = entry.getKey();
+      flushSingleBufferIfNecessary(buffer, appId, shuffleId,
+          partitionRange.lowerEndpoint(), partitionRange.upperEndpoint());
       flushIfNecessary();
     }
     return StatusCode.SUCCESS;
@@ -155,6 +163,13 @@ public class ShuffleBufferManager {
       return null;
     }
     return buffer.getShuffleData(blockId, readBufferSize);
+  }
+
+  void flushSingleBufferIfNecessary(ShuffleBuffer buffer, String appId,
+      int shuffleId, int startPartition, int endPartition){
+    if(this.bufferFlushEnabled && buffer.getSize() >= this.bufferFlushThreshold){
+      flushBuffer(buffer, appId, shuffleId, startPartition, endPartition);
+    }
   }
 
   void flushIfNecessary() {
