@@ -82,6 +82,7 @@ public class RssShuffleWriter<K, V, C> extends ShuffleWriter<K, V> {
   private long sendCheckInterval;
   private long sendSizeLimit;
   private boolean isMemoryShuffleEnabled;
+  private final long[] partitionLengths;
 
   public RssShuffleWriter(
       String appId,
@@ -116,6 +117,8 @@ public class RssShuffleWriter<K, V, C> extends ShuffleWriter<K, V> {
     this.partitionToServers = rssHandle.getPartitionToServers();
     this.isMemoryShuffleEnabled = isMemoryShuffleEnabled(
         sparkConf.get(RssSparkConfig.RSS_STORAGE_TYPE.key()));
+    this.partitionLengths = new long[partitioner.numPartitions()];
+    Arrays.fill(partitionLengths, 0);
   }
 
   private boolean isMemoryShuffleEnabled(String storageType) {
@@ -190,6 +193,7 @@ public class RssShuffleWriter<K, V, C> extends ShuffleWriter<K, V> {
         int partitionId = sbi.getPartitionId();
         partitionToBlockIds.putIfAbsent(partitionId, Sets.newConcurrentHashSet());
         partitionToBlockIds.get(partitionId).add(blockId);
+        partitionLengths[partitionId] += sbi.getLength();
       });
       postBlockEvent(shuffleBlockInfoList);
     }
@@ -284,9 +288,6 @@ public class RssShuffleWriter<K, V, C> extends ShuffleWriter<K, V> {
   public Option<MapStatus> stop(boolean success) {
     try {
       if (success) {
-        // fill partitionLengths with non zero dummy value so map output tracker could work correctly
-        long[] partitionLengths = new long[partitioner.numPartitions()];
-        Arrays.fill(partitionLengths, 1);
         final BlockManagerId blockManagerId =
             createDummyBlockManagerId(appId + "_" + taskId, taskAttemptId);
 
