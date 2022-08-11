@@ -29,8 +29,8 @@ cd $SHUFFLE_SERVER_HOME
 
 source "${SHUFFLE_SERVER_HOME}/bin/rss-env.sh"
 source "${SHUFFLE_SERVER_HOME}/bin/utils.sh"
-export HADOOP_USER_NAME=prod_bigdata_qa
-export HADOOP_USER_PASSWORD=CBRZSE5iwS05k1CmFdwTIkw3M5q6lswv
+export HADOOP_USER_NAME=prod_bigdata_rss
+export HADOOP_USER_PASSWORD=uYbMy7thFFZHh4vT4A8VvlhDbOI0Cg3P
 
 if [ -z "$HADOOP_HOME" ]; then
   echo "No env HADOOP_HOME."

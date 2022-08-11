@@ -26,8 +26,8 @@ COORDINATOR_HOME="$(
 )"
 CONF_FILE="./conf/coordinator.conf "
 MAIN_CLASS="org.apache.uniffle.coordinator.CoordinatorServer"
-export HADOOP_USER_NAME=prod_bigdata_qa
-export HADOOP_USER_PASSWORD=CBRZSE5iwS05k1CmFdwTIkw3M5q6lswv
+export HADOOP_USER_NAME=prod_bigdata_rss
+export HADOOP_USER_PASSWORD=uYbMy7thFFZHh4vT4A8VvlhDbOI0Cg3P
 
 cd $COORDINATOR_HOME
 
