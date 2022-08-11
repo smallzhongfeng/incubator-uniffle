@@ -17,6 +17,7 @@
 
 package org.apache.spark.shuffle;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -336,12 +337,17 @@ public class RssShuffleManager implements ShuffleManager {
           + startPartition + "]");
       start = System.currentTimeMillis();
       Map<Integer, List<ShuffleServerInfo>> partitionToServers = rssShuffleHandle.getPartitionToServers();
-      Roaring64NavigableMap blockIdBitmap = shuffleWriteClient.getShuffleResult(
-          clientType, Sets.newHashSet(partitionToServers.get(startPartition)),
-          rssShuffleHandle.getAppId(), shuffleId, startPartition);
-      LOG.info("Get shuffle blockId cost " + (System.currentTimeMillis() - start) + " ms, and get "
-          + blockIdBitmap.getLongCardinality() + " blockIds for shuffleId[" + shuffleId + "], partitionId["
-          + startPartition + "]");
+      Map<Integer, Roaring64NavigableMap> partitionToExpectBlocks = new HashMap<>();
+      for (int partition = startPartition; partition < endPartition; partition++) {
+        long ss = System.currentTimeMillis();
+        Roaring64NavigableMap blockIdBitmap = shuffleWriteClient.getShuffleResult(
+            clientType, Sets.newHashSet(partitionToServers.get(partition)),
+            rssShuffleHandle.getAppId(), shuffleId, partition);
+        partitionToExpectBlocks.put(partition, blockIdBitmap);
+        LOG.info("Get shuffle blockId cost " + (System.currentTimeMillis() - ss) + " ms, and get "
+                     + blockIdBitmap.getLongCardinality() + " blockIds for shuffleId[" + shuffleId + "], partitionId["
+                     + partition + "]");
+      }
 
       final RemoteStorageInfo shuffleRemoteStorageInfo = rssShuffleHandle.getRemoteStorage();
       LOG.info("Shuffle reader using remote storage {}", shuffleRemoteStorageInfo);
@@ -354,7 +360,7 @@ public class RssShuffleManager implements ShuffleManager {
           rssShuffleHandle, shuffleRemoteStoragePath, indexReadLimit,
           readerHadoopConf,
           storageType, (int) readBufferSize, partitionNumPerRange, partitionNum,
-          blockIdBitmap, taskIdBitmap);
+          partitionToExpectBlocks, taskIdBitmap);
     } else {
       throw new RuntimeException("Unexpected ShuffleHandle:" + handle.getClass().getName());
     }

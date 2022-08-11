@@ -46,13 +46,15 @@ public class RssShuffleReaderTest extends AbstractRssReaderTest {
 
     String basePath = HDFS_URI + "readTest1";
     HdfsShuffleWriteHandler writeHandler =
-        new HdfsShuffleWriteHandler("appId", 0, 0, 1, basePath, "test", conf);
+        new HdfsShuffleWriteHandler("appId", 0, 0, 0, basePath, "test", conf);
 
     Map<String, String> expectedData = Maps.newHashMap();
     Roaring64NavigableMap blockIdBitmap = Roaring64NavigableMap.bitmapOf();
     Roaring64NavigableMap taskIdBitmap = Roaring64NavigableMap.bitmapOf(0);
      writeTestData(writeHandler, 2, 5, expectedData,
         blockIdBitmap, "key", KRYO_SERIALIZER, 0);
+    Map<Integer, Roaring64NavigableMap> partitionToExpectBlocks = Maps.newHashMap();
+    partitionToExpectBlocks.put(0, blockIdBitmap);
 
     TaskContext contextMock = mock(TaskContext.class);
     RssShuffleHandle handleMock = mock(RssShuffleHandle.class);
@@ -71,7 +73,7 @@ public class RssShuffleReaderTest extends AbstractRssReaderTest {
 
     RssShuffleReader rssShuffleReaderSpy = spy(new RssShuffleReader<String, String>(0, 1, contextMock,
         handleMock, basePath, 1000, conf, StorageType.HDFS.name(),
-        1000, 2, 10, blockIdBitmap, taskIdBitmap));
+        1000, 1, 10, partitionToExpectBlocks, taskIdBitmap));
 
     validateResult(rssShuffleReaderSpy.read(), expectedData, 10);
   }
