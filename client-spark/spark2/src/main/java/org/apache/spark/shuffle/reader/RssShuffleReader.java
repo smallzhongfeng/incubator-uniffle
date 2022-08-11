@@ -18,7 +18,9 @@
 package org.apache.spark.shuffle.reader;
 
 import java.util.List;
+import java.util.Map;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.spark.InterruptibleIterator;
 import org.apache.spark.ShuffleDependency;
@@ -35,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import scala.Function0;
 import scala.Option;
 import scala.Product2;
+import scala.collection.AbstractIterator;
 import scala.collection.Iterator;
 import scala.runtime.AbstractFunction0;
 import scala.runtime.BoxedUnit;
@@ -62,9 +65,9 @@ public class RssShuffleReader<K, C> implements ShuffleReader<K, C> {
   private int partitionNumPerRange;
   private int partitionNum;
   private String storageType;
-  private Roaring64NavigableMap blockIdBitmap;
+  private Map<Integer, Roaring64NavigableMap> partitionToExpectBlocks;
   private Roaring64NavigableMap taskIdBitmap;
-  private List<ShuffleServerInfo> shuffleServerInfoList;
+  private Map<Integer, List<ShuffleServerInfo>> partitionToShuffleServers;
   private Configuration hadoopConf;
 
   public RssShuffleReader(
@@ -79,7 +82,7 @@ public class RssShuffleReader<K, C> implements ShuffleReader<K, C> {
       int readBufferSize,
       int partitionNumPerRange,
       int partitionNum,
-      Roaring64NavigableMap blockIdBitmap,
+      Map<Integer, Roaring64NavigableMap> partitionToExpectBlocks,
       Roaring64NavigableMap taskIdBitmap) {
     this.appId = rssShuffleHandle.getAppId();
     this.startPartition = startPartition;
@@ -95,24 +98,17 @@ public class RssShuffleReader<K, C> implements ShuffleReader<K, C> {
     this.readBufferSize = readBufferSize;
     this.partitionNumPerRange = partitionNumPerRange;
     this.partitionNum = partitionNum;
-    this.blockIdBitmap = blockIdBitmap;
+    this.partitionToExpectBlocks = partitionToExpectBlocks;
     this.taskIdBitmap = taskIdBitmap;
     this.hadoopConf = hadoopConf;
-    this.shuffleServerInfoList =
-        (List<ShuffleServerInfo>) (rssShuffleHandle.getPartitionToServers().get(startPartition));
+    this.partitionToShuffleServers = rssShuffleHandle.getPartitionToServers();
   }
 
   @Override
   public Iterator<Product2<K, C>> read() {
     LOG.info("Shuffle read started:" + getReadInfo());
 
-    CreateShuffleReadClientRequest request = new CreateShuffleReadClientRequest(
-        appId, shuffleId, startPartition, storageType, basePath, indexReadLimit, readBufferSize,
-        partitionNumPerRange, partitionNum, blockIdBitmap, taskIdBitmap, shuffleServerInfoList, hadoopConf);
-    ShuffleReadClient shuffleReadClient = ShuffleClientFactory.getInstance().createShuffleReadClient(request);
-    RssShuffleDataIterator rssShuffleDataIterator = new RssShuffleDataIterator<K, C>(
-        shuffleDependency.serializer(), shuffleReadClient,
-        context.taskMetrics().shuffleReadMetrics());
+    MultiPartitionIterator rssShuffleDataIterator = new MultiPartitionIterator<K, C>();
 
     Iterator<Product2<K, C>> resultIter = null;
     Iterator<Product2<K, C>> aggregatedIter = null;
@@ -180,4 +176,55 @@ public class RssShuffleReader<K, C> implements ShuffleReader<K, C> {
   public Configuration getHadoopConf() {
     return hadoopConf;
   }
+
+  class MultiPartitionIterator<K, C> extends AbstractIterator<Product2<K, C>> {
+    java.util.Iterator<RssShuffleDataIterator> iterator;
+    RssShuffleDataIterator dataIterator;
+
+    MultiPartitionIterator() {
+      List<RssShuffleDataIterator> iterators = Lists.newArrayList();
+      for (int partition = startPartition; partition < endPartition; partition++) {
+        if (partitionToExpectBlocks.get(partition).isEmpty()) {
+          LOG.info("{} partition is empty partition", partition);
+          continue;
+        }
+        List<ShuffleServerInfo> shuffleServerInfoList = partitionToShuffleServers.get(partition);
+        CreateShuffleReadClientRequest request = new CreateShuffleReadClientRequest(
+            appId, shuffleId, partition, storageType, basePath, indexReadLimit, readBufferSize,
+            1 , partitionNum, partitionToExpectBlocks.get(partition), taskIdBitmap, shuffleServerInfoList, hadoopConf);
+        ShuffleReadClient shuffleReadClient = ShuffleClientFactory.getInstance().createShuffleReadClient(request);
+        RssShuffleDataIterator iterator = new RssShuffleDataIterator<K, C>(
+            shuffleDependency.serializer(), shuffleReadClient,
+            context.taskMetrics().shuffleReadMetrics());
+        iterators.add(iterator);
+      }
+      iterator = iterators.iterator();
+      if (iterator.hasNext()) {
+        dataIterator = iterator.next();
+        iterator.remove();
+      }
+    }
+
+    @Override
+    public boolean hasNext() {
+      if (dataIterator == null) {
+        return false;
+      }
+      while (!dataIterator.hasNext()) {
+        if (!iterator.hasNext()) {
+          return false;
+        }
+        dataIterator = iterator.next();
+        iterator.remove();
+      }
+      return dataIterator.hasNext();
+    }
+
+    @Override
+    public Product2<K, C> next() {
+      Product2<K, C> result = dataIterator.next();
+      return result;
+    }
+  }
+
 }
