@@ -24,7 +24,7 @@ COORDINATOR_HOME="$(
   cd "$(dirname "$0")/.."
   pwd
 )"
-CONF_FILE="./conf/coordinator.conf "
+CONF_FILE="/home/hadoop/rss-conf/coordinator.conf"
 MAIN_CLASS="org.apache.uniffle.coordinator.CoordinatorServer"
 export HADOOP_USER_NAME=prod_bigdata_rss
 export HADOOP_USER_PASSWORD=uYbMy7thFFZHh4vT4A8VvlhDbOI0Cg3P

@@ -22,7 +22,7 @@ set -e
 
 JAVA_HOME=/usr/local/jdk1.8.0_77
 HADOOP_HOME=/home/hadoop/hadoop-current
-XMX_SIZE="30g"
+XMX_SIZE="80g"
 
 RUNNER="${JAVA_HOME}/bin/java"
 JPS="${JAVA_HOME}/bin/jps"

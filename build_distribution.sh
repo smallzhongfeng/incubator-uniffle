@@ -184,5 +184,10 @@ cp -r bin $DISTDIR
 cp -r conf $DISTDIR
 
 rm -rf "rss-$VERSION.tgz"
-tar czf "rss-$VERSION.tgz" $DISTDIR
+
+if [ -d output ]; then
+    rm -rf output
+fi
+mkdir output
+tar czf "output/rss-$VERSION.tgz" $DISTDIR
 rm -rf $DISTDIR

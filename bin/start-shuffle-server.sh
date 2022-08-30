@@ -42,7 +42,7 @@ export JAVA_HOME
 HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
 HADOOP_DEPENDENCY=`$HADOOP_HOME/bin/hadoop classpath --glob`
 
-CONF_FILE="./conf/server.conf "
+CONF_FILE="/home/hadoop/rss-conf/server.conf"
 MAIN_CLASS="org.apache.uniffle.server.ShuffleServer"
 
 echo "Check process existence"
