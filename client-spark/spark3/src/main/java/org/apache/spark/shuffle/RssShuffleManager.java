@@ -456,37 +456,10 @@ public class RssShuffleManager implements ShuffleManager {
       int startMapIndex,
       int endMapIndex) {
     Roaring64NavigableMap taskIdBitmap = Roaring64NavigableMap.bitmapOf();
-    Iterator<Tuple2<BlockManagerId, Seq<Tuple3<BlockId, Object, Object>>>> mapStatusIter = null;
-    // Since Spark 3.1 refactors the interface of getMapSizesByExecutorId,
-    // we use reflection and catch for the compatibility with 3.0 & 3.1
-    try {
-      // attempt to use Spark 3.1's API
-      mapStatusIter = (Iterator<Tuple2<BlockManagerId, Seq<Tuple3<BlockId, Object, Object>>>>)
-          SparkEnv.get().mapOutputTracker().getClass()
-              .getDeclaredMethod("getMapSizesByExecutorId",
-                  int.class, int.class, int.class, int.class, int.class)
-              .invoke(SparkEnv.get().mapOutputTracker(),
-                  shuffleId,
-                  startMapIndex,
-                  endMapIndex,
-                  startPartition,
-                  endPartition);
-    } catch (Exception e) {
-      // fallback and attempt to use Spark 3.0's API
-      try {
-        mapStatusIter = (Iterator<Tuple2<BlockManagerId, Seq<Tuple3<BlockId, Object, Object>>>>)
-            SparkEnv.get().mapOutputTracker().getClass()
-                .getDeclaredMethod("getMapSizesByExecutorId",
-                    int.class, int.class, int.class)
-                .invoke(
-                    SparkEnv.get().mapOutputTracker(),
-                    shuffleId,
-                    startPartition,
-                    endPartition);
-      } catch (Exception ee) {
-        throw new RuntimeException(ee);
-      }
-    }
+    // we only support 3.2.0 for didi-spark
+    Iterator<Tuple2<BlockManagerId, Seq<Tuple3<BlockId, Object, Object>>>> mapStatusIter =
+        SparkEnv.get().mapOutputTracker().getPushBasedShuffleMapSizesByExecutorId(shuffleId,
+            startMapIndex, endMapIndex, startPartition, endPartition).iter();
     while (mapStatusIter.hasNext()) {
       Tuple2<BlockManagerId, Seq<Tuple3<BlockId, Object, Object>>> tuple2 = mapStatusIter.next();
       if (!tuple2._1().topologyInfo().isDefined()) {
