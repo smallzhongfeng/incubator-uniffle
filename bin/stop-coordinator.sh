@@ -23,7 +23,7 @@ set -o errexit   # exit the script if any statement returns a non-true return va
 set -e
 
 SCRIPT_DIR="$(cd "`dirname "$0"`"; pwd)"
-BASE_DIR="$(cd "`dirname "$0"`/.."; pwd)"
+BASE_DIR=/home/hadoop/cluster-data/pids
 
 source "$SCRIPT_DIR/utils.sh"
-common_shutdown "coordinator" ${BASE_DIR}
+common_shutdown "rss-coordinator" ${BASE_DIR}

@@ -39,14 +39,14 @@ function is_process_running {
 #---
 function common_shutdown {
   process_name="$1"
-  install_dir="$2"
+  pid_dir="$2"
   max_attempt=30
-  pid=`cat ${install_dir}/currentpid`
+  pid=`cat ${pid_dir}/${process_name}.pid`
 
   kill_process_with_retry "${pid}" "${process_name}" "${max_attempt}"
 
   if [[ $? == 0 ]]; then
-    rm -f ${install_dir}/currentpid
+    rm -f ${pid_dir}/${process_name}.pid
     return 0
   else
     return 1

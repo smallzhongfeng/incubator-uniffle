@@ -90,8 +90,10 @@ JVM_ARGS=" -server \
 
 ARGS=""
 
-LOG_CONF_FILE="./conf/log4j.properties"
-LOG_PATH="./logs/shuffle_server.log"
+CONF_DIR="/home/hadoop/rss-conf"
+CLUSTER_DATA_DIR="/home/hadoop/cluster-data"
+LOG_CONF_FILE="${CONF_DIR}/log4j.properties"
+LOG_PATH="${CLUSTER_DATA_DIR}/logs/rss-shuffle-server.log"
 
 if [ -f ${LOG_CONF_FILE} ]; then
   ARGS="$ARGS -Dlog4j.configuration=file:${LOG_CONF_FILE} -Dlog.path=${LOG_PATH}"
@@ -102,4 +104,4 @@ fi
 
 $RUNNER $ARGS $JVM_ARGS $JAVA_LIB_PATH -cp $CLASSPATH $MAIN_CLASS --conf $CONF_FILE $@ > logs/start.log 2>&1 &
 
-echo $! >$SHUFFLE_SERVER_HOME/currentpid
+echo $! >$CLUSTER_DATA_DIR/pids/rss-shuffle-server.pid

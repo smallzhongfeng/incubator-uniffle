@@ -75,9 +75,11 @@ JVM_ARGS=" -server \
           -XX:InitiatingHeapOccupancyPercent=45 "
 
 ARGS=""
+CONF_DIR="/home/hadoop/rss-conf"
+CLUSTER_DATA_DIR="/home/hadoop/cluster-data"
+LOG_CONF_FILE="${CONF_DIR}/log4j.properties"
+LOG_PATH="${CLUSTER_DATA_DIR}/logs/rss-coordinator.log"
 
-LOG_CONF_FILE="./conf/log4j.properties"
-LOG_PATH="./logs/coordinator.log"
 if [ -f ${LOG_CONF_FILE} ]; then
   ARGS="$ARGS -Dlog4j.configuration=file:${LOG_CONF_FILE} -Dlog.path=${LOG_PATH}"
 else
@@ -87,4 +89,4 @@ fi
 
 $RUNNER $ARGS $JVM_ARGS -cp $CLASSPATH $MAIN_CLASS --conf $CONF_FILE $@ > logs/start.log 2>&1 &
 
-echo $! >$COORDINATOR_HOME/currentpid
+echo $! >$CLUSTER_DATA_DIR/pids/rss-coordinator.pid
