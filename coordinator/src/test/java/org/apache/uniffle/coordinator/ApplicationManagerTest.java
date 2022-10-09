@@ -113,7 +113,7 @@ public class ApplicationManagerTest {
     applicationManager.incRemoteStorageCounter(remotePath1);
     applicationManager.incRemoteStorageCounter(remotePath1);
     String testApp1 = "testApp1";
-    applicationManager.refreshAppId(testApp1);
+    applicationManager.refreshAppId(testApp1, "");
     assertEquals(remotePath2, applicationManager.pickRemoteStorage(testApp1).getPath());
     assertEquals(remotePath2, applicationManager.getAppIdToRemoteStorageInfo().get(testApp1).getPath());
     assertEquals(1, applicationManager.getRemoteStoragePathCounter().get(remotePath2).get());
@@ -128,7 +128,7 @@ public class ApplicationManagerTest {
 
     // refresh app1, got remotePath2, then remove remotePath2,
     // it should be existed in counter until it expired
-    applicationManager.refreshAppId(testApp1);
+    applicationManager.refreshAppId(testApp1, "");
     assertEquals(remotePath2, applicationManager.pickRemoteStorage(testApp1).getPath());
     remoteStoragePath = remotePath1;
     applicationManager.refreshRemoteStorage(remoteStoragePath, "");
@@ -155,7 +155,7 @@ public class ApplicationManagerTest {
     // test case for storage type without remote storage,
     // NPE shouldn't happen when clear the resource
     String testApp = "clearWithoutRemoteStorageTest";
-    applicationManager.refreshAppId(testApp);
+    applicationManager.refreshAppId(testApp, "");
     // just set a value != 0, it should be reset to 0 if everything goes well
     CoordinatorMetrics.gaugeRunningAppNum.set(100.0);
     assertEquals(1, applicationManager.getAppIds().size());
@@ -174,7 +174,7 @@ public class ApplicationManagerTest {
     Thread pickThread1 = new Thread(() -> {
       for (int i = 0; i < 1000; i++) {
         String appId = appPrefix + i;
-        applicationManager.refreshAppId(appId);
+        applicationManager.refreshAppId(appId, "");
         applicationManager.pickRemoteStorage(appId);
       }
     });
@@ -182,7 +182,7 @@ public class ApplicationManagerTest {
     Thread pickThread2 = new Thread(() -> {
       for (int i = 1000; i < 2000; i++) {
         String appId = appPrefix + i;
-        applicationManager.refreshAppId(appId);
+        applicationManager.refreshAppId(appId, "");
         applicationManager.pickRemoteStorage(appId);
       }
     });
@@ -190,7 +190,7 @@ public class ApplicationManagerTest {
     Thread pickThread3 = new Thread(() -> {
       for (int i = 2000; i < 3000; i++) {
         String appId = appPrefix + i;
-        applicationManager.refreshAppId(appId);
+        applicationManager.refreshAppId(appId, "");
         applicationManager.pickRemoteStorage(appId);
       }
     });

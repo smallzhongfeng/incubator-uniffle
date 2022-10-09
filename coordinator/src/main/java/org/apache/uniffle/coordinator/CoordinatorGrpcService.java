@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Sets;
@@ -28,6 +29,7 @@ import com.google.protobuf.Empty;
 import io.grpc.Context;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
+import org.apache.uniffle.common.exception.RssException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,6 +112,7 @@ public class CoordinatorGrpcService extends CoordinatorServerGrpc.CoordinatorSer
     final int replica = request.getDataReplica();
     final Set<String> requiredTags = Sets.newHashSet(request.getRequireTagsList());
     final int requiredShuffleServerNumber = request.getAssignmentShuffleServerNumber();
+    final String user = request.getUser();
 
     LOG.info("Request of getShuffleAssignments for appId[" + appId
         + "], shuffleId[" + shuffleId + "], partitionNum[" + partitionNum
@@ -127,6 +130,23 @@ public class CoordinatorGrpcService extends CoordinatorServerGrpc.CoordinatorSer
       response =
           CoordinatorUtils.toGetShuffleAssignmentsResponse(pra);
       logAssignmentResult(appId, shuffleId, pra);
+      // user app quota
+      Map<String, AppSetAndNum> currentUserApps = ApplicationManager.getCurrentUserApps();
+      // init AppSetAndNum
+      AppSetAndNum appSetAndNum = currentUserApps.computeIfAbsent(user, x -> new AppSetAndNum(
+          new AtomicInteger(0), Sets.newConcurrentHashSet()));
+
+      Integer defaultAppNum = ApplicationManager.getDefaultUserApps().getOrDefault(user,
+          coordinatorServer.getCoordinatorConf().getInteger(CoordinatorConf.COORDINATOR_USER_DEFAULT_APP_NUM));
+      int currentAppNum = appSetAndNum.getAppNum().get();
+      if (currentAppNum > defaultAppNum - 1) {
+        String msg = "Denied by AccessClusterLoadChecker => "
+            + "User: " + user + ", current app num is: " + currentAppNum
+            + ", default app num is: " + defaultAppNum + ". We will reject this app " + appId;
+        throw new RssException(msg);
+      }
+      appSetAndNum.getAppNum().incrementAndGet();
+      appSetAndNum.getAppSet().add(appId);
       responseObserver.onNext(response);
     } catch (Exception e) {
       LOG.error("Errors on getting shuffle assignments for app: {}, shuffleId: {}, partitionNum: {}, "
@@ -194,7 +214,8 @@ public class CoordinatorGrpcService extends CoordinatorServerGrpc.CoordinatorSer
       AppHeartBeatRequest request,
       StreamObserver<AppHeartBeatResponse> responseObserver) {
     String appId = request.getAppId();
-    coordinatorServer.getApplicationManager().refreshAppId(appId);
+    String user = request.getUser();
+    coordinatorServer.getApplicationManager().refreshAppId(appId, user);
     LOG.debug("Got heartbeat from application: " + appId);
     AppHeartBeatResponse response = AppHeartBeatResponse
         .newBuilder()

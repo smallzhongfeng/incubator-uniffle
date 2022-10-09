@@ -15,29 +15,34 @@
  * limitations under the License.
  */
 
-package org.apache.uniffle.client.request;
+package org.apache.uniffle.coordinator;
 
-public class RssAppHeartBeatRequest {
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
-  private final String appId;
-  private final String user;
-  private final long timeoutMs;
+public class AppSetAndNum {
+  private final AtomicInteger appNum;
+  private final Set<String> appSet;
 
-  public RssAppHeartBeatRequest(String appId, String user, long timeoutMs) {
-    this.appId = appId;
-    this.user = user;
-    this.timeoutMs = timeoutMs;
+  public AppSetAndNum(AtomicInteger appNum, Set<String> appSet) {
+    this.appNum = appNum;
+    this.appSet = appSet;
   }
 
-  public String getAppId() {
-    return appId;
+  public AtomicInteger getAppNum() {
+    return appNum;
   }
 
-  public long getTimeoutMs() {
-    return timeoutMs;
+  public Set<String> getAppSet() {
+    return appSet;
   }
 
-  public String getUser() {
-    return user;
+  @Override
+  public String toString() {
+    return "AppSetAndNum{" +
+        "appNum=" + appNum +
+        ", appSet=" + appSet +
+        '}';
   }
 }

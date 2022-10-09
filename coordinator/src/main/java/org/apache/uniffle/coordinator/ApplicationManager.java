@@ -17,6 +17,9 @@
 
 package org.apache.uniffle.coordinator;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Comparator;
@@ -55,23 +58,30 @@ public class ApplicationManager {
   private Map<String, String> remoteStorageToHost = Maps.newConcurrentMap();
   private Map<String, RemoteStorageInfo> availableRemoteStorageInfo = Maps.newHashMap();
   private ScheduledExecutorService scheduledExecutorService;
+  private final static Map<String, AppSetAndNum> currentUserApps = Maps.newConcurrentMap();
+  private final String userAppFilePath;
+  private final static Map<String, Integer> defaultUserApps = Maps.newConcurrentMap();
   // it's only for test case to check if status check has problem
   private boolean hasErrorInStatusCheck = false;
 
   public ApplicationManager(CoordinatorConf conf) {
     expired = conf.getLong(CoordinatorConf.COORDINATOR_APP_EXPIRED);
+    userAppFilePath = conf.get(CoordinatorConf.COORDINATOR_USER_DEFAULT_PATH);
     // the thread for checking application status
     scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(
         ThreadUtils.getThreadFactory("ApplicationManager-%d"));
     scheduledExecutorService.scheduleAtFixedRate(
-        () -> statusCheck(), expired / 2, expired / 2, TimeUnit.MILLISECONDS);
+        this::statusCheck, expired / 2, expired / 2, TimeUnit.MILLISECONDS);
   }
 
-  public void refreshAppId(String appId) {
+  public void refreshAppId(String appId, String user) {
     if (!appIds.containsKey(appId)) {
       CoordinatorMetrics.counterTotalAppNum.inc();
     }
+    AppSetAndNum appSet = currentUserApps.get(user);
+    appSet.getAppSet().add(appId);
     appIds.put(appId, System.currentTimeMillis());
+    LOG.error("SSSSSS: user: {}, appSet: {}, appId: {}", user, appSet, appId);
   }
 
   public void refreshRemoteStorage(String remoteStoragePath, String remoteStorageConf) {
@@ -223,7 +233,20 @@ public class ApplicationManager {
           decRemoteStorageCounter(appIdToRemoteStorageInfo.get(appId).getPath());
           appIdToRemoteStorageInfo.remove(appId);
         }
+        for (Map.Entry<String, AppSetAndNum> entry : currentUserApps.entrySet()) {
+          Set<String> appSet = entry.getValue().getAppSet();
+          if (appSet.contains(appId)) {
+            AtomicInteger appNum = entry.getValue().getAppNum();
+            int restAppNum = appNum.decrementAndGet();
+            appSet.remove(appId);
+            LOG.error("SSSSSS: Rest app num : {}", restAppNum);
+            break;
+          }
+        }
       }
+
+      // begin to update app default app num
+      detectUserResource();
       CoordinatorMetrics.gaugeRunningAppNum.set(appIds.size());
       updateRemoteStorageMetrics();
     } catch (Exception e) {
@@ -266,5 +289,30 @@ public class ApplicationManager {
       LOG.warn("Invalid format of remoteStoragePath to get host, {}", remoteStoragePath);
     }
     return storageHost;
+  }
+
+  public void detectUserResource() {
+    String content;
+    LOG.warn("Loading file from class path {}.", userAppFilePath);
+    try (
+        InputStreamReader fileReader = new FileReader(userAppFilePath);
+        BufferedReader bufferedReader = new BufferedReader(fileReader)){
+
+      while ((content = bufferedReader.readLine()) != null) {
+        String user = content.split("=")[0].trim();
+        Integer appNum = Integer.valueOf(content.split("=")[1].trim());
+        defaultUserApps.put(user, appNum);
+      }
+    } catch (Exception e) {
+      LOG.error("Error load file {}", userAppFilePath, e);
+    }
+  }
+
+  public static Map<String, Integer> getDefaultUserApps() {
+    return defaultUserApps;
+  }
+
+  public static Map<String, AppSetAndNum> getCurrentUserApps() {
+    return currentUserApps;
   }
 }

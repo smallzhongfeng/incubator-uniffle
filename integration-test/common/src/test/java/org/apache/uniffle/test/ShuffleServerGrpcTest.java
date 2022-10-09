@@ -111,8 +111,8 @@ public class ShuffleServerGrpcTest extends IntegrationTestBase {
         0,
         Lists.newArrayList(new PartitionRange(0, 1)), new RemoteStorageInfo(""));
 
-    shuffleWriteClient.sendAppHeartbeat("clearResourceTest1", 1000L);
-    shuffleWriteClient.sendAppHeartbeat("clearResourceTest2", 1000L);
+    shuffleWriteClient.sendAppHeartbeat("clearResourceTest1", "user1",1000L);
+    shuffleWriteClient.sendAppHeartbeat("clearResourceTest2", "user1",1000L);
 
     RssRegisterShuffleRequest rrsr = new RssRegisterShuffleRequest("clearResourceTest1", 0,
         Lists.newArrayList(new PartitionRange(0, 1)), "");
@@ -127,7 +127,7 @@ public class ShuffleServerGrpcTest extends IntegrationTestBase {
     Thread t = new Thread(() -> {
       int i = 0;
       while (i < 20) {
-        shuffleWriteClient.sendAppHeartbeat("clearResourceTest1", 1000L);
+        shuffleWriteClient.sendAppHeartbeat("clearResourceTest1","user1", 1000L);
         i++;
         try {
           Thread.sleep(1000);
@@ -522,7 +522,7 @@ public class ShuffleServerGrpcTest extends IntegrationTestBase {
 
     oldValue = shuffleServers.get(0).getGrpcMetrics().getCounterMap().get(
         ShuffleServerGrpcMetrics.APP_HEARTBEAT_METHOD).get();
-    shuffleServerClient.sendHeartBeat(new RssAppHeartBeatRequest(appId, 10000));
+    shuffleServerClient.sendHeartBeat(new RssAppHeartBeatRequest(appId, "user1",10000));
     newValue = shuffleServers.get(0).getGrpcMetrics().getCounterMap().get(
         ShuffleServerGrpcMetrics.APP_HEARTBEAT_METHOD).get();
     assertEquals(oldValue + 1, newValue, 0.5);

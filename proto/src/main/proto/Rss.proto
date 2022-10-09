@@ -270,6 +270,7 @@ service CoordinatorServer {
 
 message AppHeartBeatRequest {
   string appId = 1;
+  string user = 2;
 }
 
 message AppHeartBeatResponse {
@@ -296,6 +297,7 @@ message GetShuffleServerRequest {
   int32 dataReplica = 8;
   repeated string requireTags = 9;
   int32 assignmentShuffleServerNumber = 10;
+  string user = 11;
 }
 
 message PartitionRangeAssignment {

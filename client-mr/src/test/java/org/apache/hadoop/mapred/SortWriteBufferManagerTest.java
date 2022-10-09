@@ -275,7 +275,7 @@ public class SortWriteBufferManagerTest {
     }
 
     @Override
-    public void sendAppHeartbeat(String appId, long timeoutMs) {
+    public void sendAppHeartbeat(String appId, String user, long timeoutMs) {
 
     }
 
@@ -314,7 +314,7 @@ public class SortWriteBufferManagerTest {
     }
 
     @Override
-    public ShuffleAssignmentsInfo getShuffleAssignments(String appId, int shuffleId, int partitionNum, int partitionNumPerRange, Set<String> requiredTags, int assignmentShuffleServerNumber) {
+    public ShuffleAssignmentsInfo getShuffleAssignments(String appId, int shuffleId, int partitionNum, int partitionNumPerRange, Set<String> requiredTags, int assignmentShuffleServerNumber, String user) {
       return null;
     }
 

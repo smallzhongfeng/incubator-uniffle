@@ -209,7 +209,8 @@ public class RssMRAppMaster extends MRAppMaster {
                           numReduceTasks,
                           1,
                           Sets.newHashSet(assignmentTags),
-                          requiredAssignmentShuffleServersNum
+                          requiredAssignmentShuffleServersNum,
+                          ""
                   );
 
           Map<ShuffleServerInfo, List<PartitionRange>> serverToPartitionRanges =
@@ -240,7 +241,7 @@ public class RssMRAppMaster extends MRAppMaster {
       scheduledExecutorService.scheduleAtFixedRate(
           () -> {
             try {
-              client.sendAppHeartbeat(appId, heartbeatTimeout);
+              client.sendAppHeartbeat(appId, "", heartbeatTimeout);
               LOG.info("Finish send heartbeat to coordinator and servers");
             } catch (Exception e) {
               LOG.warn("Fail to send heartbeat to coordinator and servers", e);

@@ -118,7 +118,16 @@ public class CoordinatorConf extends RssBaseConf {
       .stringType()
       .noDefaultValue()
       .withDescription("Remote Storage Cluster related conf with format $clusterId,$key=$value, separated by ';'");
-
+  public static final ConfigOption<Integer> COORDINATOR_USER_DEFAULT_APP_NUM= ConfigOptions
+      .key("rss.coordinator.user.default.app.num")
+      .intType()
+      .defaultValue(5)
+      .withDescription("Default number of apps at user level");
+  public static final ConfigOption<String> COORDINATOR_USER_DEFAULT_PATH= ConfigOptions
+      .key("rss.coordinator.user.default.path")
+      .stringType()
+      .noDefaultValue()
+      .withDescription("A configuration file for the number of apps for a user-defined user");
 
   public CoordinatorConf() {
   }

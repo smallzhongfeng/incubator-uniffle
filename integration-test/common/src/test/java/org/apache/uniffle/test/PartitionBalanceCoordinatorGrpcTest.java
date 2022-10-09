@@ -63,7 +63,7 @@ public class PartitionBalanceCoordinatorGrpcTest extends CoordinatorTestBase {
         1,
         1,
         1,
-        Sets.newHashSet(Constants.SHUFFLE_SERVER_VERSION));
+        Sets.newHashSet(Constants.SHUFFLE_SERVER_VERSION), "");
     RssGetShuffleAssignmentsResponse response = coordinatorClient.getShuffleAssignments(request);
     assertEquals(1, response.getPartitionToServers().size());
     for (Map.Entry<Integer, List<ShuffleServerInfo>> entry : response.getPartitionToServers().entrySet()) {
@@ -76,7 +76,7 @@ public class PartitionBalanceCoordinatorGrpcTest extends CoordinatorTestBase {
         1,
         1,
         1,
-        Sets.newHashSet(Constants.SHUFFLE_SERVER_VERSION));
+        Sets.newHashSet(Constants.SHUFFLE_SERVER_VERSION), "");
     response = coordinatorClient.getShuffleAssignments(request);
     assertEquals(1, response.getPartitionToServers().size());
     for (Map.Entry<Integer, List<ShuffleServerInfo>> entry : response.getPartitionToServers().entrySet()) {
@@ -89,7 +89,7 @@ public class PartitionBalanceCoordinatorGrpcTest extends CoordinatorTestBase {
         1,
         1,
         1,
-        Sets.newHashSet(Constants.SHUFFLE_SERVER_VERSION));
+        Sets.newHashSet(Constants.SHUFFLE_SERVER_VERSION), "");
     response = coordinatorClient.getShuffleAssignments(request);
     assertEquals(1, response.getPartitionToServers().size());
     for (Map.Entry<Integer, List<ShuffleServerInfo>> entry : response.getPartitionToServers().entrySet()) {

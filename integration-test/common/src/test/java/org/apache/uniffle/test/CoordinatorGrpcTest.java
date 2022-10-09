@@ -119,7 +119,7 @@ public class CoordinatorGrpcTest extends CoordinatorTestBase {
     CoordinatorTestUtils.waitForRegister(coordinatorClient,2);
     RssGetShuffleAssignmentsRequest request = new RssGetShuffleAssignmentsRequest(
         appId, 1, 10, 4, 1,
-        Sets.newHashSet(Constants.SHUFFLE_SERVER_VERSION));
+        Sets.newHashSet(Constants.SHUFFLE_SERVER_VERSION), "");
     RssGetShuffleAssignmentsResponse response = coordinatorClient.getShuffleAssignments(request);
     Set<Integer> expectedStart = Sets.newHashSet(0, 4, 8);
 
@@ -151,7 +151,7 @@ public class CoordinatorGrpcTest extends CoordinatorTestBase {
 
     request = new RssGetShuffleAssignmentsRequest(
         appId, 1, 10, 4, 2,
-        Sets.newHashSet(Constants.SHUFFLE_SERVER_VERSION));
+        Sets.newHashSet(Constants.SHUFFLE_SERVER_VERSION), "");
     response = coordinatorClient.getShuffleAssignments(request);
     serverToPartitionRanges = response.getServerToPartitionRanges();
     assertEquals(2, serverToPartitionRanges.size());
@@ -187,7 +187,7 @@ public class CoordinatorGrpcTest extends CoordinatorTestBase {
 
     request = new RssGetShuffleAssignmentsRequest(
         appId, 3, 2, 1, 1,
-        Sets.newHashSet("fake_version"));
+        Sets.newHashSet("fake_version"), "");
     try {
       coordinatorClient.getShuffleAssignments(request);
       fail("Exception should be thrown");
@@ -199,16 +199,16 @@ public class CoordinatorGrpcTest extends CoordinatorTestBase {
   @Test
   public void appHeartbeatTest() throws Exception {
     RssAppHeartBeatResponse response =
-        coordinatorClient.sendAppHeartBeat(new RssAppHeartBeatRequest("appHeartbeatTest1", 1000));
+        coordinatorClient.sendAppHeartBeat(new RssAppHeartBeatRequest("appHeartbeatTest1", "user1", 1000));
     assertEquals(ResponseStatusCode.SUCCESS, response.getStatusCode());
     assertEquals(Sets.newHashSet("appHeartbeatTest1"),
         coordinators.get(0).getApplicationManager().getAppIds());
-    coordinatorClient.sendAppHeartBeat(new RssAppHeartBeatRequest("appHeartbeatTest2", 1000));
+    coordinatorClient.sendAppHeartBeat(new RssAppHeartBeatRequest("appHeartbeatTest2","user1", 1000));
     assertEquals(Sets.newHashSet("appHeartbeatTest1", "appHeartbeatTest2"),
         coordinators.get(0).getApplicationManager().getAppIds());
     int retry = 0;
     while (retry < 5) {
-      coordinatorClient.sendAppHeartBeat(new RssAppHeartBeatRequest("appHeartbeatTest1", 1000));
+      coordinatorClient.sendAppHeartBeat(new RssAppHeartBeatRequest("appHeartbeatTest1", "user1", 1000));
       retry++;
       Thread.sleep(1000);
     }
@@ -254,7 +254,7 @@ public class CoordinatorGrpcTest extends CoordinatorTestBase {
 
     RssGetShuffleAssignmentsRequest request = new RssGetShuffleAssignmentsRequest(
         appId, 1, 10, 4, 1,
-        Sets.newHashSet(Constants.SHUFFLE_SERVER_VERSION));
+        Sets.newHashSet(Constants.SHUFFLE_SERVER_VERSION), "");
     oldValue = coordinators.get(0).getGrpcMetrics().getCounterMap()
         .get(CoordinatorGrpcMetrics.GET_SHUFFLE_ASSIGNMENTS_METHOD).get();
     coordinatorClient.getShuffleAssignments(request);

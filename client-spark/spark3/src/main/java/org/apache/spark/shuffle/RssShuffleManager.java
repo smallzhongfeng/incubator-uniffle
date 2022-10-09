@@ -33,6 +33,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 import com.google.common.collect.Sets;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.spark.ShuffleDependency;
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkEnv;
@@ -91,6 +92,7 @@ public class RssShuffleManager implements ShuffleManager {
   private ScheduledExecutorService heartBeatScheduledExecutorService;
   private boolean heartbeatStarted = false;
   private boolean dynamicConfEnabled = false;
+  private String user = null;
   private RemoteStorageInfo remoteStorage;
   private final EventLoop eventLoop;
   private final EventLoop defaultEventLoop = new EventLoop<AddBlockEvent>("ShuffleDataQueue") {
@@ -166,6 +168,11 @@ public class RssShuffleManager implements ShuffleManager {
             dataReplica, dataReplicaWrite, dataReplicaRead, dataReplicaSkipEnabled, dataTransferPoolSize,
             dataCommitPoolSize);
     registerCoordinator();
+    try {
+      user = UserGroupInformation.getCurrentUser().getShortUserName();
+    } catch (Exception e) {
+      LOG.error("Error on getting user from ugi."+ e);
+    }
     // fetch client conf and apply them if necessary and disable ESS
     if (isDriver && dynamicConfEnabled) {
       Map<String, String> clusterClientConf = shuffleWriteClient.fetchClientConf(
@@ -273,10 +280,13 @@ public class RssShuffleManager implements ShuffleManager {
                 dependency.partitioner().numPartitions(),
                 1,
                 assignmentTags,
-                requiredShuffleServerNumber);
+                requiredShuffleServerNumber,
+                user
+        );
         registerShuffleServers(id.get(), shuffleId, response.getServerToPartitionRanges());
         return response.getPartitionToServers();
       }, retryInterval, retryTimes);
+      LOG.error("SSSSSS: register shuffle user: {}", user);
     } catch (Throwable throwable) {
       throw new RssException("registerShuffle failed!", throwable);
     }
@@ -574,7 +584,7 @@ public class RssShuffleManager implements ShuffleManager {
       heartBeatScheduledExecutorService.scheduleAtFixedRate(
           () -> {
             try {
-              shuffleWriteClient.sendAppHeartbeat(id.get(), heartbeatTimeout);
+              shuffleWriteClient.sendAppHeartbeat(id.get(), user, heartbeatTimeout);
               LOG.info("Finish send heartbeat to coordinator and servers");
             } catch (Exception e) {
               LOG.warn("Fail to send heartbeat to coordinator and servers", e);

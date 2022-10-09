@@ -101,7 +101,7 @@ public class HealthCheckCoordinatorGrpcTest extends CoordinatorTestBase  {
           1,
           1,
           1,
-          Sets.newHashSet(Constants.SHUFFLE_SERVER_VERSION));
+          Sets.newHashSet(Constants.SHUFFLE_SERVER_VERSION), "");
     Uninterruptibles.sleepUninterruptibly(5, TimeUnit.SECONDS);
     assertEquals(2, coordinatorClient.getShuffleServerList().getServersCount());
     List<ServerNode> nodes  = coordinators.get(0).getClusterManager()

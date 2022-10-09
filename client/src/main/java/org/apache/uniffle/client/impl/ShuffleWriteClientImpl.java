@@ -375,9 +375,9 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
 
   @Override
   public ShuffleAssignmentsInfo getShuffleAssignments(String appId, int shuffleId, int partitionNum,
-      int partitionNumPerRange, Set<String> requiredTags, int assignmentShuffleServerNumber) {
-    RssGetShuffleAssignmentsRequest request = new RssGetShuffleAssignmentsRequest(
-        appId, shuffleId, partitionNum, partitionNumPerRange, replica, requiredTags, assignmentShuffleServerNumber);
+      int partitionNumPerRange, Set<String> requiredTags, int assignmentShuffleServerNumber, String user) {
+    RssGetShuffleAssignmentsRequest request = new RssGetShuffleAssignmentsRequest(appId, shuffleId,
+        partitionNum, partitionNumPerRange, replica, requiredTags, assignmentShuffleServerNumber, user);
 
     RssGetShuffleAssignmentsResponse response = new RssGetShuffleAssignmentsResponse(ResponseStatusCode.INTERNAL_ERROR);
     for (CoordinatorClient coordinatorClient : coordinatorClients) {
@@ -487,8 +487,8 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
   }
 
   @Override
-  public void sendAppHeartbeat(String appId, long timeoutMs) {
-    RssAppHeartBeatRequest request = new RssAppHeartBeatRequest(appId, timeoutMs);
+  public void sendAppHeartbeat(String appId, String user, long timeoutMs) {
+    RssAppHeartBeatRequest request = new RssAppHeartBeatRequest(appId, user, timeoutMs);
     List<Callable<Void>> callableList = Lists.newArrayList();
     shuffleServerInfoSet.stream().forEach(shuffleServerInfo -> {
           callableList.add(() -> {
