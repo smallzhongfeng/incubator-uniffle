@@ -544,8 +544,8 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
   }
 
   @Override
-  public void sendAppHeartbeat(String appId, long timeoutMs) {
-    RssAppHeartBeatRequest request = new RssAppHeartBeatRequest(appId, timeoutMs);
+  public void sendAppHeartbeat(String appId, long timeoutMs, String user) {
+    RssAppHeartBeatRequest request = new RssAppHeartBeatRequest(appId, timeoutMs, user);
     List<Callable<Void>> callableList = Lists.newArrayList();
     shuffleServerInfoSet.stream().forEach(shuffleServerInfo -> {
           callableList.add(() -> {
@@ -554,7 +554,7 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
                   ShuffleServerClientFactory.getInstance().getShuffleServerClient(clientType, shuffleServerInfo);
               RssAppHeartBeatResponse response = client.sendHeartBeat(request);
               if (response.getStatusCode() != ResponseStatusCode.SUCCESS) {
-                LOG.warn("Failed to send heartbeat to " + shuffleServerInfo);
+                LOG.error("Failed to send heartbeat to " + shuffleServerInfo);
               }
             } catch (Exception e) {
               LOG.warn("Error happened when send heartbeat to " + shuffleServerInfo, e);
@@ -568,8 +568,9 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
       callableList.add(() -> {
         try {
           RssAppHeartBeatResponse response = coordinatorClient.sendAppHeartBeat(request);
+          LOG.error("SSSSSS: sendAppHeartbeat successfully, user is {}", user);
           if (response.getStatusCode() != ResponseStatusCode.SUCCESS) {
-            LOG.warn("Failed to send heartbeat to " + coordinatorClient.getDesc());
+            LOG.error("Failed to send heartbeat to " + coordinatorClient.getDesc());
           } else {
             LOG.info("Successfully send heartbeat to " + coordinatorClient.getDesc());
           }
