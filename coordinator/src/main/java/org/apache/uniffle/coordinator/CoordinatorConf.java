@@ -77,7 +77,8 @@ public class CoordinatorConf extends RssBaseConf {
       .key("rss.coordinator.access.checkers")
       .stringType()
       .asList()
-      .defaultValues("org.apache.uniffle.coordinator.AccessClusterLoadChecker")
+      .defaultValues("org.apache.uniffle.coordinator.AccessClusterLoadChecker",
+          "org.apache.uniffle.coordinator.AccessAppQuotaChecker")
       .withDescription("Access checkers");
   public static final ConfigOption<Integer> COORDINATOR_ACCESS_CANDIDATES_UPDATE_INTERVAL_SEC = ConfigOptions
       .key("rss.coordinator.access.candidates.updateIntervalSec")
@@ -172,6 +173,22 @@ public class CoordinatorConf extends RssBaseConf {
       .defaultValue(20 * 1000L)
       .withDescription("The waiting duration(ms) when conf of "
           + COORDINATOR_START_SILENT_PERIOD_ENABLED + " is enabled.");
+  public static final ConfigOption<Integer> COORDINATOR_QUOTA_DEFAULT_APP_NUM = ConfigOptions
+      .key("rss.coordinator.quota.default.app.num")
+      .intType()
+      .defaultValue(5)
+      .withDescription("Default number of apps at user level");
+  public static final ConfigOption<String> COORDINATOR_QUOTA_DEFAULT_PATH = ConfigOptions
+      .key("rss.coordinator.quota.default.path")
+      .stringType()
+      .noDefaultValue()
+      .withDescription("A configuration file for the number of apps for a user-defined user");
+  public static final ConfigOption<Long> COORDINATOR_QUOTA_UNREGISTER_APP_EXPIRED = ConfigOptions
+      .key("rss.coordinator.quota.unregister.app.expired")
+      .longType()
+      .defaultValue(600 * 1000L)
+      .withDescription("This is just for app which didn't register to driver successfully, "
+          + "but register to coordinator, we need to set a deadline for this app in coordinator.");
 
   public CoordinatorConf() {
   }
