@@ -28,10 +28,10 @@ import org.apache.uniffle.coordinator.ApplicationManager;
 import org.apache.uniffle.coordinator.CoordinatorConf;
 import org.apache.uniffle.coordinator.metric.CoordinatorMetrics;
 
+import java.util.Map;
+
 import static org.apache.uniffle.coordinator.ApplicationManager.StrategyName.APP_BALANCE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AppBalanceSelectStorageStrategyTest {
 
@@ -78,6 +78,9 @@ public class AppBalanceSelectStorageStrategyTest {
     String testApp1 = "application_test_" + 1;
     applicationManager.registerApplicationInfo(testApp1, "user");
     applicationManager.refreshAppId(testApp1);
+    // in this case, ensure that all the paths are written normally
+    applicationManager.getRemoteStoragePathRankValue().get(remotePath1).getHealthy().set(true);
+    applicationManager.getRemoteStoragePathRankValue().get(remotePath2).getHealthy().set(true);
     assertEquals(remotePath2, applicationManager.pickRemoteStorage(testApp1).getPath());
     assertEquals(remotePath2, applicationManager.getAppIdToRemoteStorageInfo().get(testApp1).getPath());
     assertEquals(1, applicationManager.getRemoteStoragePathRankValue().get(remotePath2).getAppNum().get());
