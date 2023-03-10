@@ -92,6 +92,7 @@ public class ShuffleServerFaultToleranceTest extends ShuffleReadWriteBase {
     String testAppId = "ShuffleServerFaultToleranceTest.testReadFaultTolerance";
     int shuffleId = 0;
     int partitionId = 0;
+    shuffleServers.forEach(x -> x.getShuffleTaskManager().close());
     RssRegisterShuffleRequest rrsr = new RssRegisterShuffleRequest(testAppId, shuffleId,
         Lists.newArrayList(new PartitionRange(0, 0)), remoteStoragePath);
     registerShuffle(rrsr);

@@ -95,6 +95,7 @@ public class ShuffleTaskManager {
   private Map<String, ShuffleTaskInfo> shuffleTaskInfos = Maps.newConcurrentMap();
   private Map<Long, PreAllocatedBufferInfo> requireBufferIds = Maps.newConcurrentMap();
   private Runnable clearResourceThread;
+  public Thread thread;
   private BlockingQueue<PurgeEvent> expiredAppIdQueue = Queues.newLinkedBlockingQueue();
 
   public ShuffleTaskManager(
@@ -155,7 +156,7 @@ public class ShuffleTaskManager {
         }
       }
     };
-    Thread thread = new Thread(clearResourceThread);
+    thread = new Thread(clearResourceThread);
     thread.setName("clearResourceThread");
     thread.setDaemon(true);
     thread.start();
@@ -676,5 +677,10 @@ public class ShuffleTaskManager {
     synchronized (this.shuffleBufferManager) {
       this.shuffleBufferManager.flushIfNecessary();
     }
+  }
+
+  @VisibleForTesting
+  public void close() {
+    thread.stop();
   }
 }
