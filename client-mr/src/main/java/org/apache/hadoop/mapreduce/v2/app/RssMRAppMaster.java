@@ -131,6 +131,11 @@ public class RssMRAppMaster extends MRAppMaster {
         assignmentTags.addAll(Arrays.asList(rawTags.split(",")));
       }
       assignmentTags.add(Constants.SHUFFLE_SERVER_VERSION);
+      if (conf.get(RssMRConfig.RSS_CLIENT_TYPE).equals(ClientType.GRPC_NETTY.name())) {
+        assignmentTags.add(ClientType.GRPC_NETTY.name());
+      } else {
+        assignmentTags.add(ClientType.GRPC.name());
+      }
 
       final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(
           new ThreadFactory() {
@@ -198,11 +203,6 @@ public class RssMRAppMaster extends MRAppMaster {
               RssMRConfig.RSS_CLIENT_ASSIGNMENT_RETRY_INTERVAL_DEFAULT_VALUE);
       int retryTimes = conf.getInt(RssMRConfig.RSS_CLIENT_ASSIGNMENT_RETRY_TIMES,
               RssMRConfig.RSS_CLIENT_ASSIGNMENT_RETRY_TIMES_DEFAULT_VALUE);
-      if (conf.get(RssMRConfig.RSS_CLIENT_TYPE).equals(ClientType.GRPC_NETTY.name())) {
-        assignmentTags.add(ClientType.GRPC_NETTY.name());
-      } else {
-        assignmentTags.add(ClientType.GRPC.name());
-      }
       ShuffleAssignmentsInfo response;
       try {
         response = RetryUtils.retry(() -> {
