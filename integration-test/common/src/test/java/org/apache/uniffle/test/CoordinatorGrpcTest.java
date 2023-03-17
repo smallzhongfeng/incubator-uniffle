@@ -122,7 +122,7 @@ public class CoordinatorGrpcTest extends CoordinatorTestBase {
 
   @Test
   public void getShuffleAssignmentsTest() throws Exception {
-    String appId = "getShuffleAssignmentsTest";
+    final String appId = "getShuffleAssignmentsTest";
     CoordinatorTestUtils.waitForRegister(coordinatorClient,2);
     // When the shuffleServerHeartbeat Test is completed before the current test,
     // the server's tags will be [ss_v4, GRPC_NETTY] and [ss_v4, GRPC], respectively.
