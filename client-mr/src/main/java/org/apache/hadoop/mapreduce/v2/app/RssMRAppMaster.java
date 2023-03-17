@@ -68,16 +68,12 @@ import org.apache.hadoop.yarn.api.records.ContainerId;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.util.SystemClock;
+import org.apache.uniffle.common.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.uniffle.client.api.ShuffleWriteClient;
 import org.apache.uniffle.client.util.ClientUtils;
-import org.apache.uniffle.common.PartitionRange;
-import org.apache.uniffle.common.RemoteStorageInfo;
-import org.apache.uniffle.common.ShuffleAssignmentsInfo;
-import org.apache.uniffle.common.ShuffleDataDistributionType;
-import org.apache.uniffle.common.ShuffleServerInfo;
 import org.apache.uniffle.common.exception.RssException;
 import org.apache.uniffle.common.util.Constants;
 import org.apache.uniffle.common.util.RetryUtils;
@@ -197,6 +193,11 @@ public class RssMRAppMaster extends MRAppMaster {
               RssMRConfig.RSS_CLIENT_ASSIGNMENT_RETRY_INTERVAL_DEFAULT_VALUE);
       int retryTimes = conf.getInt(RssMRConfig.RSS_CLIENT_ASSIGNMENT_RETRY_TIMES,
               RssMRConfig.RSS_CLIENT_ASSIGNMENT_RETRY_TIMES_DEFAULT_VALUE);
+      if (conf.get(RssMRConfig.RSS_CLIENT_TYPE).equals(ClientType.GRPC_NETTY.name())) {
+        assignmentTags.add(ClientType.GRPC_NETTY.name());
+      } else {
+        assignmentTags.add(ClientType.GRPC.name());
+      }
       ShuffleAssignmentsInfo response;
       try {
         response = RetryUtils.retry(() -> {
