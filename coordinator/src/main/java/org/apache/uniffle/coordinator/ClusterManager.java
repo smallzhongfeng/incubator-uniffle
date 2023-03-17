@@ -41,6 +41,15 @@ public interface ClusterManager extends Closeable, Reconfigurable {
   List<ServerNode> getServerList(Set<String> requiredTags);
 
   /**
+   * Get available nodes from the cluster by client type
+   *
+   * @param requiredTags tags for filter
+   * @param clientType type for filter
+   * @return list of available server nodes
+   */
+  List<ServerNode> getServerListByClientType(Set<String> requiredTags, String clientType);
+
+  /**
    * @return number of server nodes in the cluster
    */
   int getNodesNum();

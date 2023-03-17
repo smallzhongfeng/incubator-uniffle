@@ -197,6 +197,7 @@ public class RssMRAppMaster extends MRAppMaster {
               RssMRConfig.RSS_CLIENT_ASSIGNMENT_RETRY_INTERVAL_DEFAULT_VALUE);
       int retryTimes = conf.getInt(RssMRConfig.RSS_CLIENT_ASSIGNMENT_RETRY_TIMES,
               RssMRConfig.RSS_CLIENT_ASSIGNMENT_RETRY_TIMES_DEFAULT_VALUE);
+      String clientType = conf.get(RssMRConfig.RSS_CLIENT_TYPE);
       ShuffleAssignmentsInfo response;
       try {
         response = RetryUtils.retry(() -> {
@@ -208,7 +209,8 @@ public class RssMRAppMaster extends MRAppMaster {
                           1,
                           Sets.newHashSet(assignmentTags),
                           requiredAssignmentShuffleServersNum,
-                          -1
+                          -1,
+                          clientType
                   );
 
           Map<ShuffleServerInfo, List<PartitionRange>> serverToPartitionRanges =

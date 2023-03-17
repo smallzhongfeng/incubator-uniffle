@@ -248,7 +248,16 @@ public class ShuffleServer {
     if (CollectionUtils.isNotEmpty(configuredTags)) {
       tags.addAll(configuredTags);
     }
+    isNettyServerEnabled();
     LOG.info("Server tags: {}", tags);
+  }
+
+  private void isNettyServerEnabled() {
+    if (nettyServerEnabled) {
+      tags.add("grpc-netty");
+    } else {
+      tags.add("grpc");
+    }
   }
 
   private void registerMetrics() throws Exception {

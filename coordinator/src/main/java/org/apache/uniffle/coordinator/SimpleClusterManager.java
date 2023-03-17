@@ -44,6 +44,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.uniffle.common.ClientType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -229,6 +230,16 @@ public class SimpleClusterManager implements ClusterManager {
       }
     }
     return availableNodes;
+  }
+
+  @Override
+  public List<ServerNode> getServerListByClientType(Set<String> requiredTags, String type) {
+    if (ClientType.GRPC_NETTY.name().equals(type)) {
+      requiredTags.add("grpc-netty");
+    } else {
+      requiredTags.add("grpc");
+    }
+    return getServerList(requiredTags);
   }
 
   public Set<String> getExcludeNodes() {

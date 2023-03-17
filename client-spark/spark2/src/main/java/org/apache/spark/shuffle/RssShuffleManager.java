@@ -269,12 +269,13 @@ public class RssShuffleManager implements ShuffleManager {
     // retryInterval must bigger than `rss.server.heartbeat.timeout`, or maybe it will return the same result
     long retryInterval = sparkConf.get(RssSparkConfig.RSS_CLIENT_ASSIGNMENT_RETRY_INTERVAL);
     int retryTimes = sparkConf.get(RssSparkConfig.RSS_CLIENT_ASSIGNMENT_RETRY_TIMES);
+    String clientType = sparkConf.get(RssSparkConfig.RSS_CLIENT_TYPE);
     Map<Integer, List<ShuffleServerInfo>> partitionToServers;
     try {
       partitionToServers = RetryUtils.retry(() -> {
         ShuffleAssignmentsInfo response = shuffleWriteClient.getShuffleAssignments(
                 appId, shuffleId, dependency.partitioner().numPartitions(),
-                partitionNumPerRange, assignmentTags, requiredShuffleServerNumber, -1);
+                partitionNumPerRange, assignmentTags, requiredShuffleServerNumber, -1, clientType);
         registerShuffleServers(appId, shuffleId, response.getServerToPartitionRanges(), remoteStorage);
         return response.getPartitionToServers();
       }, retryInterval, retryTimes);

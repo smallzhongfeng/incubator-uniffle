@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.jupiter.api.AfterEach;
@@ -36,11 +37,14 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.uniffle.common.ClientType;
+import org.apache.uniffle.common.ServerStatus;
 import org.apache.uniffle.coordinator.metric.CoordinatorMetrics;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SimpleClusterManagerTest {
@@ -48,6 +52,8 @@ public class SimpleClusterManagerTest {
   private static final Logger LOG = LoggerFactory.getLogger(SimpleClusterManagerTest.class);
 
   private final Set<String> testTags = Sets.newHashSet("test");
+  private final Set<String> nettyTags = Sets.newHashSet("test", "grpc-netty");
+  private final Set<String> grpcTags = Sets.newHashSet("test", "grpc");
 
   @BeforeEach
   public void setUp() {
@@ -79,15 +85,15 @@ public class SimpleClusterManagerTest {
     try (SimpleClusterManager clusterManager = new SimpleClusterManager(ssc, new Configuration())) {
 
       ServerNode sn1 = new ServerNode("sn1", "ip", 0, 100L, 50L, 20,
-              10, testTags, true);
+              10, grpcTags, true);
       ServerNode sn2 = new ServerNode("sn2", "ip", 0, 100L, 50L, 21,
-              10, testTags, true);
+              10, grpcTags, true);
       ServerNode sn3 = new ServerNode("sn3", "ip", 0, 100L, 50L, 20,
-              11, testTags, true);
+              11, grpcTags, true);
       clusterManager.add(sn1);
       clusterManager.add(sn2);
       clusterManager.add(sn3);
-      List<ServerNode> serverNodes = clusterManager.getServerList(testTags);
+      List<ServerNode> serverNodes = clusterManager.getServerListByClientType(testTags, ClientType.GRPC.name());
       assertEquals(3, serverNodes.size());
       Set<String> expectedIds = Sets.newHashSet("sn1", "sn2", "sn3");
       assertEquals(expectedIds, serverNodes.stream().map(ServerNode::getId).collect(Collectors.toSet()));
@@ -98,18 +104,73 @@ public class SimpleClusterManagerTest {
       sn2 = new ServerNode("sn2", "ip", 0, 100L, 50L, 21,
               10, Sets.newHashSet("test", "new_tag"), true);
       ServerNode sn4 = new ServerNode("sn4", "ip", 0, 100L, 51L, 20,
-              10, testTags, true);
+              10, grpcTags, true);
       clusterManager.add(sn1);
       clusterManager.add(sn2);
       clusterManager.add(sn4);
       serverNodes = clusterManager.getServerList(testTags);
-      assertEquals(3, serverNodes.size());
-      assertTrue(serverNodes.contains(sn2));
+      assertEquals(2, serverNodes.size());
       assertTrue(serverNodes.contains(sn3));
       assertTrue(serverNodes.contains(sn4));
 
       Map<String, Set<ServerNode>> tagToNodes = clusterManager.getTagToNodes();
-      assertEquals(2, tagToNodes.size());
+      assertEquals(3, tagToNodes.size());
+
+      Set<ServerNode> newTagNodes = tagToNodes.get("new_tag");
+      assertEquals(2, newTagNodes.size());
+      assertTrue(newTagNodes.contains(sn1));
+      assertTrue(newTagNodes.contains(sn2));
+
+      Set<ServerNode> testTagNodes = tagToNodes.get("test");
+      assertEquals(3, testTagNodes.size());
+      assertTrue(testTagNodes.contains(sn2));
+      assertTrue(testTagNodes.contains(sn3));
+      assertTrue(testTagNodes.contains(sn4));
+    }
+  }
+
+  @Test
+  public void getServerListForNettyTest() throws Exception {
+    CoordinatorConf ssc = new CoordinatorConf();
+    ssc.setLong(CoordinatorConf.COORDINATOR_HEARTBEAT_TIMEOUT, 30 * 1000L);
+    try (SimpleClusterManager clusterManager = new SimpleClusterManager(ssc, new Configuration())) {
+
+      ServerNode sn1 = new ServerNode("sn1", "ip", 0, 100L, 50L, 20,
+          10, nettyTags, true, ServerStatus.ACTIVE, Maps.newConcurrentMap(), 1);
+      ServerNode sn2 = new ServerNode("sn2", "ip", 0, 100L, 50L, 21,
+          10, nettyTags, true, ServerStatus.ACTIVE, Maps.newConcurrentMap(), 1);
+      ServerNode sn3 = new ServerNode("sn3", "ip", 0, 100L, 50L, 20,
+          11, nettyTags, true, ServerStatus.ACTIVE, Maps.newConcurrentMap(), 1);
+      ServerNode sn4 = new ServerNode("sn4", "ip", 0, 100L, 50L, 20,
+          11, grpcTags, true);
+      clusterManager.add(sn1);
+      clusterManager.add(sn2);
+      clusterManager.add(sn3);
+      clusterManager.add(sn4);
+      // Since netty port is open, coordinator will automatically add netty-grpc tag to this batch of machines
+      List<ServerNode> serverNodes2 = clusterManager.getServerListByClientType(testTags, ClientType.GRPC_NETTY.name());
+      assertEquals(3, serverNodes2.size());
+
+      Map<String, Set<ServerNode>> tagToNodes = clusterManager.getTagToNodes();
+      assertEquals(3, tagToNodes.size());
+
+      // tag changes
+      sn1 = new ServerNode("sn1", "ip", 0, 100L, 50L, 20,
+          10, Sets.newHashSet("new_tag"), true, ServerStatus.ACTIVE, Maps.newConcurrentMap(), 1);
+      sn2 = new ServerNode("sn2", "ip", 0, 100L, 50L, 21,
+          10, Sets.newHashSet("test", "new_tag"),
+          true, ServerStatus.ACTIVE, Maps.newConcurrentMap(), 1);
+      sn4 = new ServerNode("sn4", "ip", 0, 100L, 51L, 20,
+          10, grpcTags, true);
+      clusterManager.add(sn1);
+      clusterManager.add(sn2);
+      clusterManager.add(sn4);
+      Set<ServerNode> testTagNodesForNetty = tagToNodes.get(ClientType.GRPC_NETTY.name());
+      assertNull(testTagNodesForNetty);
+
+      List<ServerNode> serverNodes = clusterManager.getServerListByClientType(grpcTags, ClientType.GRPC.name());
+      assertEquals(1, serverNodes.size());
+      assertTrue(serverNodes.contains(sn4));
 
       Set<ServerNode> newTagNodes = tagToNodes.get("new_tag");
       assertEquals(2, newTagNodes.size());
@@ -139,19 +200,19 @@ public class SimpleClusterManagerTest {
       clusterManager.add(sn2);
       clusterManager.add(sn3);
 
-      List<ServerNode> serverNodes = clusterManager.getServerList(testTags);
+      List<ServerNode> serverNodes = clusterManager.getServerListByClientType(testTags, ClientType.GRPC.name());
       assertEquals(2, serverNodes.size());
       assertEquals(0, CoordinatorMetrics.gaugeUnhealthyServerNum.get());
       clusterManager.nodesCheck();
 
-      List<ServerNode> serverList = clusterManager.getServerList(testTags);
+      List<ServerNode> serverList = clusterManager.getServerListByClientType(testTags, ClientType.GRPC.name());
       Assertions.assertEquals(2, serverList.size());
       assertEquals(1, CoordinatorMetrics.gaugeUnhealthyServerNum.get());
 
       sn3.setTimestamp(System.currentTimeMillis() - 60 * 1000L);
       clusterManager.nodesCheck();
 
-      List<ServerNode> serverList2 = clusterManager.getServerList(testTags);
+      List<ServerNode> serverList2 = clusterManager.getServerListByClientType(testTags, ClientType.GRPC.name());
       Assertions.assertEquals(1, serverList2.size());
       assertEquals(1, CoordinatorMetrics.gaugeUnhealthyServerNum.get());
     }
@@ -170,18 +231,20 @@ public class SimpleClusterManagerTest {
     try (SimpleClusterManager clusterManager = new SimpleClusterManager(ssc, new Configuration())) {
       addNode("sn0", clusterManager);
       addNode("sn1", clusterManager);
-      List<ServerNode> serverNodes = clusterManager.getServerList(testTags);
+      List<ServerNode> serverNodes = clusterManager.getServerListByClientType(testTags, ClientType.GRPC.name());
       assertEquals(2, serverNodes.size());
       Set<String> expectedIds = Sets.newHashSet("sn0", "sn1");
       assertEquals(expectedIds,
               serverNodes.stream().map(ServerNode::getId).collect(Collectors.toSet()));
-      await().atMost(1, TimeUnit.SECONDS).until(() -> clusterManager.getServerList(testTags).isEmpty());
+      await().atMost(1, TimeUnit.SECONDS)
+          .until(() -> clusterManager.getServerListByClientType(testTags, ClientType.GRPC.name()).isEmpty());
 
       addNode("sn2", clusterManager);
-      serverNodes = clusterManager.getServerList(testTags);
+      serverNodes = clusterManager.getServerListByClientType(testTags, ClientType.GRPC.name());
       assertEquals(1, serverNodes.size());
       assertEquals("sn2", serverNodes.get(0).getId());
-      await().atMost(1, TimeUnit.SECONDS).until(() -> clusterManager.getServerList(testTags).isEmpty());
+      await().atMost(1, TimeUnit.SECONDS)
+          .until(() -> clusterManager.getServerListByClientType(testTags, ClientType.GRPC.name()).isEmpty());
 
     }
   }
@@ -200,14 +263,14 @@ public class SimpleClusterManagerTest {
       clusterManager.add(sn1);
       clusterManager.add(sn2);
       clusterManager.add(sn3);
-      List<ServerNode> serverNodes = clusterManager.getServerList(testTags);
+      List<ServerNode> serverNodes = clusterManager.getServerListByClientType(testTags, ClientType.GRPC.name());
       assertEquals(3, serverNodes.size());
 
       sn3.setTimestamp(System.currentTimeMillis() - 60 * 1000L);
       clusterManager.nodesCheck();
 
       Map<String, Set<ServerNode>> tagToNodes = clusterManager.getTagToNodes();
-      List<ServerNode> serverList = clusterManager.getServerList(testTags);
+      List<ServerNode> serverList = clusterManager.getServerListByClientType(testTags, ClientType.GRPC.name());
       Assertions.assertEquals(2, tagToNodes.get(testTags.iterator().next()).size());
       Assertions.assertEquals(2, serverList.size());
 
@@ -236,7 +299,7 @@ public class SimpleClusterManagerTest {
       final Set<String> nodes = Sets.newHashSet("node1-1999", "node2-1999");
       writeExcludeHosts(excludeNodesPath, nodes);
       await().atMost(3, TimeUnit.SECONDS).until(() -> scm.getExcludeNodes().equals(nodes));
-      List<ServerNode> availableNodes = scm.getServerList(testTags);
+      List<ServerNode> availableNodes = scm.getServerListByClientType(testTags, ClientType.GRPC.name());
       assertEquals(2, availableNodes.size());
       Set<String> remainNodes = Sets.newHashSet("node3-1999", "node4-1999");
       assertEquals(remainNodes, availableNodes.stream().map(ServerNode::getId).collect(Collectors.toSet()));
@@ -265,7 +328,7 @@ public class SimpleClusterManagerTest {
       await().atMost(3, TimeUnit.SECONDS).until(() -> scm.getExcludeNodes().isEmpty());
 
       remainNodes = Sets.newHashSet("node1-1999", "node2-1999", "node3-1999", "node4-1999");
-      availableNodes = scm.getServerList(testTags);
+      availableNodes = scm.getServerListByClientType(testTags, ClientType.GRPC.name());
       assertEquals(remainNodes, availableNodes.stream().map(ServerNode::getId).collect(Collectors.toSet()));
     }
   }

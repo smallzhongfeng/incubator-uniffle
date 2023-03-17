@@ -20,15 +20,12 @@ package org.apache.uniffle.test;
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.uniffle.common.ShuffleServerInfo;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -129,7 +126,7 @@ public class AssignmentWithTagsTest extends CoordinatorTestBase {
 
     File dir3 = new File(tmpDir, "server3");
     for (int i = 0; i < 2; i++) {
-      createAndStartShuffleServerWithTags(Sets.newHashSet("elastic"), dir3);
+      createAndStartShuffleServerWithTags(Sets.newHashSet(ClientType.GRPC_NETTY.name()), dir3);
     }
 
     // Wait all shuffle servers registering to coordinator
@@ -146,7 +143,7 @@ public class AssignmentWithTagsTest extends CoordinatorTestBase {
   }
 
   @Test
-  public void testTags() throws Exception {
+  public void testTags() {
     ShuffleWriteClientImpl shuffleWriteClient = new ShuffleWriteClientImpl(ClientType.GRPC.name(), 3, 1000, 1,
         1, 1, 1, true, 1, 1, 10, 10);
     shuffleWriteClient.registerCoordinators(COORDINATOR_QUORUM);
@@ -154,14 +151,15 @@ public class AssignmentWithTagsTest extends CoordinatorTestBase {
     // Case1 : only set the single default shuffle version tag
     ShuffleAssignmentsInfo assignmentsInfo =
         shuffleWriteClient.getShuffleAssignments("app-1",
-            1, 1, 1, Sets.newHashSet(Constants.SHUFFLE_SERVER_VERSION), 1, -1);
+            1, 1, 1, Sets.newHashSet(Constants.SHUFFLE_SERVER_VERSION),
+            1, -1, ClientType.GRPC.name());
 
     List<Integer> assignedServerPorts = assignmentsInfo
         .getPartitionToServers()
         .values()
         .stream()
-        .flatMap(x -> x.stream())
-        .map(x -> x.getGrpcPort())
+        .flatMap(Collection::stream)
+        .map(ShuffleServerInfo::getGrpcPort)
         .collect(Collectors.toList());
     assertEquals(1, assignedServerPorts.size());
     assertTrue(tagOfShufflePorts.get(Constants.SHUFFLE_SERVER_VERSION).contains(assignedServerPorts.get(0)));
@@ -169,7 +167,8 @@ public class AssignmentWithTagsTest extends CoordinatorTestBase {
     // Case2: Set the single non-exist shuffle server tag
     try {
       assignmentsInfo = shuffleWriteClient.getShuffleAssignments("app-2",
-          1, 1, 1, Sets.newHashSet("non-exist"), 1, -1);
+          1, 1, 1, Sets.newHashSet("non-exist"),
+          1, -1, ClientType.GRPC.name());
       fail();
     } catch (Exception e) {
       assertTrue(e.getMessage().startsWith("Error happened when getShuffleAssignments with"));
@@ -177,34 +176,37 @@ public class AssignmentWithTagsTest extends CoordinatorTestBase {
 
     // Case3: Set the single fixed tag
     assignmentsInfo = shuffleWriteClient.getShuffleAssignments("app-3",
-        1, 1, 1, Sets.newHashSet("fixed"), 1, -1);
+        1, 1, 1, Sets.newHashSet("fixed"),
+        1, -1, ClientType.GRPC.name());
     assignedServerPorts = assignmentsInfo
         .getPartitionToServers()
         .values()
         .stream()
-        .flatMap(x -> x.stream())
-        .map(x -> x.getGrpcPort())
+        .flatMap(Collection::stream)
+        .map(ShuffleServerInfo::getGrpcPort)
         .collect(Collectors.toList());
     assertEquals(1, assignedServerPorts.size());
     assertTrue(tagOfShufflePorts.get("fixed").contains(assignedServerPorts.get(0)));
 
     // case4: Set the multiple tags if exists
     assignmentsInfo = shuffleWriteClient.getShuffleAssignments("app-4",
-        1, 1, 1, Sets.newHashSet("fixed", Constants.SHUFFLE_SERVER_VERSION), 1, -1);
+        1, 1, 1, Sets.newHashSet("fixed",
+            Constants.SHUFFLE_SERVER_VERSION), 1, -1, ClientType.GRPC.name());
     assignedServerPorts = assignmentsInfo
         .getPartitionToServers()
         .values()
         .stream()
-        .flatMap(x -> x.stream())
-        .map(x -> x.getGrpcPort())
+        .flatMap(Collection::stream)
+        .map(ShuffleServerInfo::getGrpcPort)
         .collect(Collectors.toList());
     assertEquals(1, assignedServerPorts.size());
     assertTrue(tagOfShufflePorts.get("fixed").contains(assignedServerPorts.get(0)));
 
     // case5: Set the multiple tags if non-exist
     try {
-      assignmentsInfo = shuffleWriteClient.getShuffleAssignments("app-5",
-          1, 1, 1, Sets.newHashSet("fixed", "elastic", Constants.SHUFFLE_SERVER_VERSION), 1, -1);
+      assignmentsInfo = shuffleWriteClient.getShuffleAssignments("app-6",
+          1, 1, 1, Sets.newHashSet("fixed", ClientType.GRPC_NETTY.name(),
+              Constants.SHUFFLE_SERVER_VERSION), 1, -1, ClientType.GRPC_NETTY.name());
       fail();
     } catch (Exception e) {
       assertTrue(e.getMessage().startsWith("Error happened when getShuffleAssignments with"));

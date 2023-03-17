@@ -23,24 +23,25 @@ import com.google.common.annotations.VisibleForTesting;
 
 public class RssGetShuffleAssignmentsRequest {
 
-  private String appId;
-  private int shuffleId;
-  private int partitionNum;
-  private int partitionNumPerRange;
-  private int dataReplica;
-  private Set<String> requiredTags;
-  private int assignmentShuffleServerNumber;
-  private int estimateTaskConcurrency;
+  private final String appId;
+  private final int shuffleId;
+  private final int partitionNum;
+  private final int partitionNumPerRange;
+  private final int dataReplica;
+  private final Set<String> requiredTags;
+  private final int assignmentShuffleServerNumber;
+  private final int estimateTaskConcurrency;
+  private final String clientType;
 
   @VisibleForTesting
   public RssGetShuffleAssignmentsRequest(String appId, int shuffleId, int partitionNum,
       int partitionNumPerRange, int dataReplica, Set<String> requiredTags) {
-    this(appId, shuffleId, partitionNum, partitionNumPerRange, dataReplica, requiredTags, -1, -1);
+    this(appId, shuffleId, partitionNum, partitionNumPerRange, dataReplica, requiredTags, -1, -1, "GRPC");
   }
 
   public RssGetShuffleAssignmentsRequest(String appId, int shuffleId, int partitionNum,
       int partitionNumPerRange, int dataReplica, Set<String> requiredTags, int assignmentShuffleServerNumber,
-      int estimateTaskConcurrency) {
+      int estimateTaskConcurrency, String clientType) {
     this.appId = appId;
     this.shuffleId = shuffleId;
     this.partitionNum = partitionNum;
@@ -49,6 +50,7 @@ public class RssGetShuffleAssignmentsRequest {
     this.requiredTags = requiredTags;
     this.assignmentShuffleServerNumber = assignmentShuffleServerNumber;
     this.estimateTaskConcurrency = estimateTaskConcurrency;
+    this.clientType = clientType;
   }
 
   public String getAppId() {
@@ -81,5 +83,9 @@ public class RssGetShuffleAssignmentsRequest {
 
   public int getEstimateTaskConcurrency() {
     return estimateTaskConcurrency;
+  }
+
+  public String getClientType() {
+    return clientType;
   }
 }

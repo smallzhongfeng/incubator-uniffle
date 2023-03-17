@@ -71,7 +71,9 @@ public class PartitionBalanceAssignmentStrategy extends AbstractAssignmentStrate
       int replica,
       Set<String> requiredTags,
       int requiredShuffleServerNumber,
-      int estimateTaskConcurrency) {
+      int estimateTaskConcurrency,
+      String clientType
+  ) {
 
     if (partitionNumPerRange != 1) {
       throw new RuntimeException("PartitionNumPerRange must be one");
@@ -79,7 +81,7 @@ public class PartitionBalanceAssignmentStrategy extends AbstractAssignmentStrate
 
     SortedMap<PartitionRange, List<ServerNode>> assignments;
     synchronized (this) {
-      List<ServerNode> nodes = clusterManager.getServerList(requiredTags);
+      List<ServerNode> nodes = clusterManager.getServerListByClientType(requiredTags, clientType);
       Map<ServerNode, PartitionAssignmentInfo> newPartitionInfos = Maps.newConcurrentMap();
       for (ServerNode node : nodes) {
         PartitionAssignmentInfo partitionInfo;

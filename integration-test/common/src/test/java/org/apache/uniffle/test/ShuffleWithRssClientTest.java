@@ -373,8 +373,8 @@ public class ShuffleWithRssClientTest extends ShuffleReadWriteBase {
     shuffleWriteClientImpl.registerCoordinators(COORDINATOR_QUORUM);
     response = RetryUtils.retry(() -> {
       int currentTryTime = tryTime.incrementAndGet();
-      ShuffleAssignmentsInfo shuffleAssignments = shuffleWriteClientImpl.getShuffleAssignments(appId,
-          1, 1, 1, Sets.newHashSet(Constants.SHUFFLE_SERVER_VERSION), 1, -1);
+      ShuffleAssignmentsInfo shuffleAssignments = shuffleWriteClientImpl.getShuffleAssignments(appId, 1,
+          1, 1, Sets.newHashSet(Constants.SHUFFLE_SERVER_VERSION), 1, -1, ClientType.GRPC.name());
 
       Map<ShuffleServerInfo, List<PartitionRange>> serverToPartitionRanges =
           shuffleAssignments.getServerToPartitionRanges();

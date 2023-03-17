@@ -346,6 +346,7 @@ public class RssShuffleManager implements ShuffleManager {
     long retryInterval = sparkConf.get(RssSparkConfig.RSS_CLIENT_ASSIGNMENT_RETRY_INTERVAL);
     int retryTimes = sparkConf.get(RssSparkConfig.RSS_CLIENT_ASSIGNMENT_RETRY_TIMES);
     int estimateTaskConcurrency = RssSparkShuffleUtils.estimateTaskConcurrency(sparkConf);
+    String clientType = sparkConf.get(RssSparkConfig.RSS_CLIENT_TYPE);
     Map<Integer, List<ShuffleServerInfo>> partitionToServers;
     try {
       partitionToServers = RetryUtils.retry(() -> {
@@ -356,7 +357,8 @@ public class RssShuffleManager implements ShuffleManager {
                 1,
                 assignmentTags,
                 requiredShuffleServerNumber,
-                estimateTaskConcurrency);
+                estimateTaskConcurrency,
+                clientType);
         registerShuffleServers(id.get(), shuffleId, response.getServerToPartitionRanges(), remoteStorage);
         return response.getPartitionToServers();
       }, retryInterval, retryTimes);

@@ -388,6 +388,7 @@ message GetShuffleServerRequest {
   repeated string requireTags = 9;
   int32 assignmentShuffleServerNumber = 10;
   int32 estimateTaskConcurrency = 11;
+  string clientType = 12;
 }
 
 message PartitionRangeAssignment {
