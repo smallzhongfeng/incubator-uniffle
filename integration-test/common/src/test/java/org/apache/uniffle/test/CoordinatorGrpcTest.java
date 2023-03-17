@@ -121,7 +121,7 @@ public class CoordinatorGrpcTest extends CoordinatorTestBase {
 
   @Test
   public void getShuffleAssignmentsTest() throws Exception {
-    String appId = "getShuffleAssignmentsTest";
+    final String appId = "getShuffleAssignmentsTest";
     CoordinatorTestUtils.waitForRegister(coordinatorClient,2);
     shuffleServers.get(0).stopServer();
     ShuffleServerConf shuffleServerConf = shuffleServers.get(0).getShuffleServerConf();
