@@ -182,12 +182,6 @@ public class MRIntegrationTestBase extends IntegrationTestBase {
   }
 
   private void runMRApp(Configuration conf, Tool tool, String[] args) throws Exception {
-    while (conf.iterator().hasNext()) {
-      System.out.println("conf is => " + conf.iterator().next());
-    }
-    for (String arg : args) {
-      System.out.println("args is => " + arg);
-    }
     assertEquals(0, ToolRunner.run(conf, tool, args), tool.getClass().getName() + " failed");
   }
 
