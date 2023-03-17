@@ -44,13 +44,13 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.uniffle.common.ClientType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.uniffle.client.impl.grpc.ShuffleServerInternalGrpcClient;
 import org.apache.uniffle.client.request.RssCancelDecommissionRequest;
 import org.apache.uniffle.client.request.RssDecommissionRequest;
+import org.apache.uniffle.common.ClientType;
 import org.apache.uniffle.common.ServerStatus;
 import org.apache.uniffle.common.config.RssConf;
 import org.apache.uniffle.common.exception.InvalidRequestException;
