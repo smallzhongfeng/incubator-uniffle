@@ -125,9 +125,9 @@ public class CoordinatorGrpcTest extends CoordinatorTestBase {
     CoordinatorTestUtils.waitForRegister(coordinatorClient,2);
     shuffleServers.get(0).stopServer();
     ShuffleServerConf shuffleServerConf = shuffleServers.get(0).getShuffleServerConf();
-    shuffleServerConf.setInteger("rss.rpc.server.port", SHUFFLE_SERVER_PORT + 3);
-    shuffleServerConf.setInteger("rss.jetty.http.port", 18089);
-    shuffleServerConf.setInteger(ShuffleServerConf.NETTY_SERVER_PORT, -3);
+    shuffleServerConf.setInteger("rss.rpc.server.port", SHUFFLE_SERVER_PORT + 2);
+    shuffleServerConf.setInteger("rss.jetty.http.port", 18082);
+    shuffleServerConf.setInteger(ShuffleServerConf.NETTY_SERVER_PORT, -1);
     shuffleServerConf.set(ShuffleServerConf.STORAGE_MEDIA_PROVIDER_ENV_KEY, "RSS_ENV_KEY");
     String baseDir = shuffleServerConf.get(ShuffleServerConf.RSS_STORAGE_BASE_PATH).get(0);
     String storageTypeJsonSource = String.format("{\"%s\": \"ssd\"}", baseDir);
