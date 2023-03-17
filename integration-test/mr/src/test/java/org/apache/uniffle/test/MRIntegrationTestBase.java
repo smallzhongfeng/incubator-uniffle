@@ -44,6 +44,8 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
+import org.apache.uniffle.common.ClientType;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -165,6 +167,7 @@ public class MRIntegrationTestBase extends IntegrationTestBase {
     jobConf.set(MRJobConfig.MAPREDUCE_APPLICATION_CLASSPATH,
         "$PWD/rss.jar/" + localFile.getName() + "," + MRJobConfig.DEFAULT_MAPREDUCE_APPLICATION_CLASSPATH);
     jobConf.set(RssMRConfig.RSS_COORDINATOR_QUORUM, COORDINATOR_QUORUM);
+    jobConf.set(RssMRConfig.RSS_CLIENT_TYPE, ClientType.GRPC.name());
     updateRssConfiguration(jobConf);
     runMRApp(jobConf, getTestTool(), getTestArgs());
 
@@ -179,6 +182,12 @@ public class MRIntegrationTestBase extends IntegrationTestBase {
   }
 
   private void runMRApp(Configuration conf, Tool tool, String[] args) throws Exception {
+    while(conf.iterator().hasNext()) {
+      System.out.println("conf is => " + conf.iterator().next());
+    }
+    for (String arg : args) {
+      System.out.println("args is => " + arg);
+    }
     assertEquals(0, ToolRunner.run(conf, tool, args), tool.getClass().getName() + " failed");
   }
 
