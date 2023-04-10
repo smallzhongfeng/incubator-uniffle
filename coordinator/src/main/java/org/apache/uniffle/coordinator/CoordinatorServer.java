@@ -19,7 +19,6 @@ package org.apache.uniffle.coordinator;
 
 import io.prometheus.client.CollectorRegistry;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.uniffle.common.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -35,6 +34,7 @@ import org.apache.uniffle.common.metrics.MetricReporterFactory;
 import org.apache.uniffle.common.rpc.ServerInterface;
 import org.apache.uniffle.common.security.SecurityConfig;
 import org.apache.uniffle.common.security.SecurityContextFactory;
+import org.apache.uniffle.common.util.Constants;
 import org.apache.uniffle.common.util.RssUtils;
 import org.apache.uniffle.common.web.CommonMetricsServlet;
 import org.apache.uniffle.common.web.JettyServer;

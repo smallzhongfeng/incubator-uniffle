@@ -46,13 +46,10 @@ public abstract class GRPCMetrics {
   protected Gauge.Child gaugeGrpcOpen;
   protected Counter.Child counterGrpcTotal;
   protected MetricsManager metricsManager;
-  private String tags;
+  private final String tags;
 
   public GRPCMetrics(String tags) {
     this.tags = tags;
-  }
-
-  public GRPCMetrics() {
   }
 
   public abstract void registerMetrics();
