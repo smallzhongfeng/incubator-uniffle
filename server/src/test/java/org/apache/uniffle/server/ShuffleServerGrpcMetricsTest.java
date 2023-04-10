@@ -23,7 +23,6 @@ import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Summary;
 
 import org.junit.jupiter.api.Test;
-
 import org.apache.uniffle.common.util.Constants;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
