@@ -21,7 +21,9 @@ import java.util.Map;
 
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Summary;
+
 import org.apache.uniffle.common.util.Constants;
+
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

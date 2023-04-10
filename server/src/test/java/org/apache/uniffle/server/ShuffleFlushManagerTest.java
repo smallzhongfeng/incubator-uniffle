@@ -39,7 +39,6 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
-import org.apache.uniffle.common.util.Constants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,6 +52,7 @@ import org.apache.uniffle.common.ShuffleDataResult;
 import org.apache.uniffle.common.ShufflePartitionedBlock;
 import org.apache.uniffle.common.config.RssBaseConf;
 import org.apache.uniffle.common.util.ChecksumUtils;
+import org.apache.uniffle.common.util.Constants;
 import org.apache.uniffle.server.buffer.ShuffleBufferManager;
 import org.apache.uniffle.server.event.AppPurgeEvent;
 import org.apache.uniffle.server.storage.HdfsStorageManager;
@@ -193,8 +193,8 @@ public class ShuffleFlushManagerTest extends HdfsTestBase {
         .labels(Constants.SHUFFLE_SERVER_VERSION, storageHost).get(), 0.5);
     assertEquals(0.0, ShuffleServerMetrics.counterRemoteStorageFailedWrite
         .labels(Constants.SHUFFLE_SERVER_VERSION, storageHost).get(), 0.5);
-    assertEquals(0.0, ShuffleServerMetrics.counterRemoteStorageSuccessWrite.
-        labels(Constants.SHUFFLE_SERVER_VERSION, storageHost).get(), 0.5);
+    assertEquals(0.0, ShuffleServerMetrics.counterRemoteStorageSuccessWrite
+        .labels(Constants.SHUFFLE_SERVER_VERSION, storageHost).get(), 0.5);
     ShuffleFlushManager manager =
         new ShuffleFlushManager(shuffleServerConf, mockShuffleServer, storageManager);
     ShuffleDataFlushEvent event1 =

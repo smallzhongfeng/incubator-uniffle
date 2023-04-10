@@ -20,8 +20,6 @@ package org.apache.uniffle.coordinator.metric;
 import org.apache.uniffle.common.metrics.GRPCMetrics;
 import org.apache.uniffle.common.util.Constants;
 
-import static org.apache.uniffle.common.util.Constants.COORDINATOR_TAG;
-
 public class CoordinatorGrpcMetrics extends GRPCMetrics {
 
   public static final String HEARTBEAT_METHOD = "heartbeat";
@@ -34,7 +32,6 @@ public class CoordinatorGrpcMetrics extends GRPCMetrics {
   private static final String GRPC_HEARTBEAT_TOTAL =
       "grpc_heartbeat_total";
   private final String tags;
-
 
   public CoordinatorGrpcMetrics(String tags) {
     super(tags);
