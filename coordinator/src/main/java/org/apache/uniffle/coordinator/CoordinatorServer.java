@@ -19,6 +19,7 @@ package org.apache.uniffle.coordinator;
 
 import io.prometheus.client.CollectorRegistry;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.uniffle.common.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -207,7 +208,7 @@ public class CoordinatorServer extends ReconfigurableBase {
     LOG.info("Register metrics");
     CollectorRegistry coordinatorCollectorRegistry = new CollectorRegistry(true);
     CoordinatorMetrics.register(coordinatorCollectorRegistry);
-    grpcMetrics = new CoordinatorGrpcMetrics();
+    grpcMetrics = new CoordinatorGrpcMetrics(Constants.COORDINATOR_TAG);
     grpcMetrics.register(new CollectorRegistry(true));
     boolean verbose = coordinatorConf.getBoolean(CoordinatorConf.RSS_JVM_METRICS_VERBOSE_ENABLE);
     CollectorRegistry jvmCollectorRegistry = new CollectorRegistry(true);

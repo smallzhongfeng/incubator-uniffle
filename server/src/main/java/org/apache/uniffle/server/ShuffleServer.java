@@ -271,9 +271,6 @@ public class ShuffleServer {
     String tags = coverToString();
     ShuffleServerMetrics.register(shuffleServerCollectorRegistry, tags);
     grpcMetrics = new ShuffleServerGrpcMetrics(tags);
-
-//    ShuffleServerMetrics.register(shuffleServerCollectorRegistry);
-//    grpcMetrics = new ShuffleServerGrpcMetrics();
     grpcMetrics.register(new CollectorRegistry(true));
     CollectorRegistry jvmCollectorRegistry = new CollectorRegistry(true);
     boolean verbose = shuffleServerConf.getBoolean(ShuffleServerConf.RSS_JVM_METRICS_VERBOSE_ENABLE);

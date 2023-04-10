@@ -39,6 +39,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import org.apache.uniffle.common.util.Constants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -186,10 +187,14 @@ public class ShuffleFlushManagerTest extends HdfsTestBase {
         StorageManagerFactory.getInstance().createStorageManager(shuffleServerConf);
     storageManager.registerRemoteStorage(appId, remoteStorage);
     String storageHost = cluster.getURI().getHost();
-    assertEquals(0.0, ShuffleServerMetrics.counterRemoteStorageTotalWrite.labels(storageHost).get(), 0.5);
-    assertEquals(0.0, ShuffleServerMetrics.counterRemoteStorageRetryWrite.labels(storageHost).get(), 0.5);
-    assertEquals(0.0, ShuffleServerMetrics.counterRemoteStorageFailedWrite.labels(storageHost).get(), 0.5);
-    assertEquals(0.0, ShuffleServerMetrics.counterRemoteStorageSuccessWrite.labels(storageHost).get(), 0.5);
+    assertEquals(0.0, ShuffleServerMetrics.counterRemoteStorageTotalWrite
+        .labels(Constants.SHUFFLE_SERVER_VERSION, storageHost).get(), 0.5);
+    assertEquals(0.0, ShuffleServerMetrics.counterRemoteStorageRetryWrite
+        .labels(Constants.SHUFFLE_SERVER_VERSION, storageHost).get(), 0.5);
+    assertEquals(0.0, ShuffleServerMetrics.counterRemoteStorageFailedWrite
+        .labels(Constants.SHUFFLE_SERVER_VERSION, storageHost).get(), 0.5);
+    assertEquals(0.0, ShuffleServerMetrics.counterRemoteStorageSuccessWrite.
+        labels(Constants.SHUFFLE_SERVER_VERSION, storageHost).get(), 0.5);
     ShuffleFlushManager manager =
         new ShuffleFlushManager(shuffleServerConf, mockShuffleServer, storageManager);
     ShuffleDataFlushEvent event1 =
@@ -214,8 +219,10 @@ public class ShuffleFlushManagerTest extends HdfsTestBase {
     validate(appId, 2, 2, blocks21, 1, remoteStorage.getPath());
     assertEquals(blocks21.size(), manager.getCommittedBlockIds(appId, 2).getLongCardinality());
 
-    assertEquals(3.0, ShuffleServerMetrics.counterRemoteStorageTotalWrite.labels(storageHost).get(), 0.5);
-    assertEquals(3.0, ShuffleServerMetrics.counterRemoteStorageSuccessWrite.labels(storageHost).get(), 0.5);
+    assertEquals(3.0, ShuffleServerMetrics.counterRemoteStorageTotalWrite
+        .labels(Constants.SHUFFLE_SERVER_VERSION, storageHost).get(), 0.5);
+    assertEquals(3.0, ShuffleServerMetrics.counterRemoteStorageSuccessWrite
+        .labels(Constants.SHUFFLE_SERVER_VERSION, storageHost).get(), 0.5);
 
     // test case for process event whose related app was cleared already
     assertEquals(0, ShuffleServerMetrics.gaugeWriteHandler.get(), 0.5);

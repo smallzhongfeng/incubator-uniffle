@@ -19,6 +19,7 @@ package org.apache.uniffle.test;
 
 import io.grpc.stub.StreamObserver;
 import io.prometheus.client.CollectorRegistry;
+import org.apache.uniffle.common.util.Constants;
 import org.junit.jupiter.api.Test;
 
 import org.apache.uniffle.client.impl.grpc.CoordinatorGrpcClient;
@@ -59,7 +60,7 @@ public class CoordinatorGrpcServerTest {
     baseConf.set(RssBaseConf.RPC_SERVER_PORT, 20001);
     baseConf.set(RssBaseConf.RPC_EXECUTOR_SIZE, 2);
 
-    GRPCMetrics grpcMetrics = new CoordinatorGrpcMetrics();
+    GRPCMetrics grpcMetrics = new CoordinatorGrpcMetrics(Constants.COORDINATOR_TAG);
     grpcMetrics.register(new CollectorRegistry(true));
     GrpcServer grpcServer = GrpcServer.Builder.newBuilder()
         .conf(baseConf)

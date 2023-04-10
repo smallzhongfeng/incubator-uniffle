@@ -64,19 +64,16 @@ public abstract class GRPCMetrics {
   }
 
   private void registerGeneralMetrics() {
-    gaugeGrpcOpen = metricsManager.addGauge(GRPC_OPEN).labels(tags);
-    counterGrpcTotal = metricsManager.addCounter(GRPC_TOTAL).labels(tags);
-    gaugeMap.putIfAbsent(
-        GRPC_SERVER_EXECUTOR_ACTIVE_THREADS_KEY,
-        metricsManager.addGauge(GRPC_SERVER_EXECUTOR_ACTIVE_THREADS).labels(tags)
+    gaugeGrpcOpen = metricsManager.addGauge(GRPC_OPEN, Constants.SHUFFLE_SERVER_TAGS).labels(tags);
+    counterGrpcTotal = metricsManager.addCounter(GRPC_TOTAL, Constants.SHUFFLE_SERVER_TAGS).labels(tags);
+    gaugeMap.putIfAbsent(GRPC_SERVER_EXECUTOR_ACTIVE_THREADS_KEY,
+        metricsManager.addGauge(GRPC_SERVER_EXECUTOR_ACTIVE_THREADS, Constants.SHUFFLE_SERVER_TAGS).labels(tags)
     );
-    gaugeMap.putIfAbsent(
-        GRPC_SERVER_EXECUTOR_BLOCKING_QUEUE_SIZE_KEY,
-        metricsManager.addGauge(GRPC_SERVER_EXECUTOR_BLOCKING_QUEUE_SIZE).labels(tags)
+    gaugeMap.putIfAbsent(GRPC_SERVER_EXECUTOR_BLOCKING_QUEUE_SIZE_KEY,
+        metricsManager.addGauge(GRPC_SERVER_EXECUTOR_BLOCKING_QUEUE_SIZE, Constants.SHUFFLE_SERVER_TAGS).labels(tags)
     );
-    gaugeMap.putIfAbsent(
-            GRPC_SERVER_CONNECTION_NUMBER_KEY,
-        metricsManager.addGauge(GRPC_SERVER_CONNECTION_NUMBER).labels(tags)
+    gaugeMap.putIfAbsent(GRPC_SERVER_CONNECTION_NUMBER_KEY,
+        metricsManager.addGauge(GRPC_SERVER_CONNECTION_NUMBER, Constants.SHUFFLE_SERVER_TAGS).labels(tags)
     );
   }
 
