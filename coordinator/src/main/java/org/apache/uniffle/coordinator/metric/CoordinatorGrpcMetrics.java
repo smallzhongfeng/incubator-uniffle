@@ -37,6 +37,7 @@ public class CoordinatorGrpcMetrics extends GRPCMetrics {
     super(tags);
     this.tags = tags;
   }
+
   @Override
   public void registerMetrics() {
     gaugeMap.putIfAbsent(HEARTBEAT_METHOD,
