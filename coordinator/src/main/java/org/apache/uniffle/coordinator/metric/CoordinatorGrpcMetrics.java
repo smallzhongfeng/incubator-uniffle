@@ -19,6 +19,8 @@ package org.apache.uniffle.coordinator.metric;
 
 import org.apache.uniffle.common.metrics.GRPCMetrics;
 
+import static org.apache.uniffle.common.util.Constants.COORDINATOR_TAG;
+
 public class CoordinatorGrpcMetrics extends GRPCMetrics {
 
   public static final String HEARTBEAT_METHOD = "heartbeat";
@@ -34,12 +36,12 @@ public class CoordinatorGrpcMetrics extends GRPCMetrics {
   @Override
   public void registerMetrics() {
     gaugeMap.putIfAbsent(HEARTBEAT_METHOD,
-        metricsManager.addGauge(GRPC_HEARTBEAT));
+        metricsManager.addGauge(GRPC_HEARTBEAT).labels(COORDINATOR_TAG));
     gaugeMap.putIfAbsent(GET_SHUFFLE_ASSIGNMENTS_METHOD,
-        metricsManager.addGauge(GRPC_GET_SHUFFLE_ASSIGNMENTS));
+        metricsManager.addGauge(GRPC_GET_SHUFFLE_ASSIGNMENTS).labels(COORDINATOR_TAG));
     counterMap.putIfAbsent(HEARTBEAT_METHOD,
-        metricsManager.addCounter(GRPC_HEARTBEAT_TOTAL));
+        metricsManager.addCounter(GRPC_HEARTBEAT_TOTAL).labels(COORDINATOR_TAG));
     counterMap.putIfAbsent(GET_SHUFFLE_ASSIGNMENTS_METHOD,
-        metricsManager.addCounter(GRPC_GET_SHUFFLE_ASSIGNMENTS_TOTAL));
+        metricsManager.addCounter(GRPC_GET_SHUFFLE_ASSIGNMENTS_TOTAL).labels(COORDINATOR_TAG));
   }
 }

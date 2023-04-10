@@ -378,7 +378,7 @@ public class ShuffleFlushManagerTest extends HdfsTestBase {
     assertEquals(0, storage.getHandlerSize());
   }
 
-  private void waitForMetrics(Gauge gauge, double expected, double delta) throws Exception {
+  private void waitForMetrics(Gauge.Child gauge, double expected, double delta) throws Exception {
     int retry = 0;
     boolean match = false;
     do {

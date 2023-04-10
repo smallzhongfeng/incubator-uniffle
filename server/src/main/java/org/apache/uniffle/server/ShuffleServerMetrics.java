@@ -24,6 +24,7 @@ import io.prometheus.client.Gauge;
 import org.apache.commons.lang3.StringUtils;
 
 import org.apache.uniffle.common.metrics.MetricsManager;
+import org.apache.uniffle.common.util.Constants;
 import org.apache.uniffle.storage.common.LocalStorage;
 
 public class ShuffleServerMetrics {
@@ -90,70 +91,71 @@ public class ShuffleServerMetrics {
   private static final String HUGE_PARTITION_NUM = "huge_partition_num";
   private static final String APP_WITH_HUGE_PARTITION_NUM = "app_with_huge_partition_num";
 
-  public static Counter counterTotalAppNum;
-  public static Counter counterTotalAppWithHugePartitionNum;
-  public static Counter counterTotalPartitionNum;
-  public static Counter counterTotalHugePartitionNum;
+  public static Counter.Child counterTotalAppNum;
+  public static Counter.Child counterTotalAppWithHugePartitionNum;
+  public static Counter.Child counterTotalPartitionNum;
+  public static Counter.Child counterTotalHugePartitionNum;
 
-  public static Counter counterTotalReceivedDataSize;
-  public static Counter counterTotalWriteDataSize;
-  public static Counter counterTotalWriteBlockSize;
-  public static Counter counterTotalWriteTime;
-  public static Counter counterWriteException;
-  public static Counter counterWriteSlow;
-  public static Counter counterWriteTotal;
-  public static Counter counterEventSizeThresholdLevel1;
-  public static Counter counterEventSizeThresholdLevel2;
-  public static Counter counterEventSizeThresholdLevel3;
-  public static Counter counterEventSizeThresholdLevel4;
-  public static Counter counterTotalReadDataSize;
-  public static Counter counterTotalReadLocalDataFileSize;
-  public static Counter counterTotalReadLocalIndexFileSize;
-  public static Counter counterTotalReadMemoryDataSize;
-  public static Counter counterTotalReadTime;
-  public static Counter counterTotalFailedWrittenEventNum;
-  public static Counter counterTotalDroppedEventNum;
-  public static Counter counterTotalHdfsWriteDataSize;
-  public static Counter counterTotalLocalFileWriteDataSize;
-  public static Counter counterTotalRequireBufferFailed;
-  public static Counter counterTotalRequireBufferFailedForHugePartition;
-  public static Counter counterTotalRequireBufferFailedForRegularPartition;
+  public static Counter.Child  counterTotalReceivedDataSize;
+  public static Counter.Child  counterTotalWriteDataSize;
+  public static Counter.Child  counterTotalWriteBlockSize;
+  public static Counter.Child  counterTotalWriteTime;
+  public static Counter.Child  counterWriteException;
+  public static Counter.Child  counterWriteSlow;
+  public static Counter.Child  counterWriteTotal;
+  public static Counter.Child  counterEventSizeThresholdLevel1;
+  public static Counter.Child  counterEventSizeThresholdLevel2;
+  public static Counter.Child  counterEventSizeThresholdLevel3;
+  public static Counter.Child  counterEventSizeThresholdLevel4;
+  public static Counter.Child  counterTotalReadDataSize;
+  public static Counter.Child  counterTotalReadLocalDataFileSize;
+  public static Counter.Child  counterTotalReadLocalIndexFileSize;
+  public static Counter.Child  counterTotalReadMemoryDataSize;
+  public static Counter.Child  counterTotalReadTime;
+  public static Counter.Child  counterTotalFailedWrittenEventNum;
+  public static Counter.Child  counterTotalDroppedEventNum;
+  public static Counter.Child  counterTotalHdfsWriteDataSize;
+  public static Counter.Child  counterTotalLocalFileWriteDataSize;
+  public static Counter.Child  counterTotalRequireBufferFailed;
+  public static Counter.Child  counterTotalRequireBufferFailedForHugePartition;
+  public static Counter.Child  counterTotalRequireBufferFailedForRegularPartition;
 
-  public static Counter counterLocalStorageTotalWrite;
-  public static Counter counterLocalStorageRetryWrite;
-  public static Counter counterLocalStorageFailedWrite;
-  public static Counter counterLocalStorageSuccessWrite;
-  public static Counter counterTotalRequireReadMemoryNum;
-  public static Counter counterTotalRequireReadMemoryRetryNum;
-  public static Counter counterTotalRequireReadMemoryFailedNum;
+  public static Counter.Child  counterLocalStorageTotalWrite;
+  public static Counter.Child  counterLocalStorageRetryWrite;
+  public static Counter.Child  counterLocalStorageFailedWrite;
+  public static Counter.Child  counterLocalStorageSuccessWrite;
+  public static Counter.Child  counterTotalRequireReadMemoryNum;
+  public static Counter.Child  counterTotalRequireReadMemoryRetryNum;
+  public static Counter.Child  counterTotalRequireReadMemoryFailedNum;
 
-  public static Gauge gaugeHugePartitionNum;
-  public static Gauge gaugeAppWithHugePartitionNum;
+  public static Gauge.Child gaugeHugePartitionNum;
+  public static Gauge.Child gaugeAppWithHugePartitionNum;
 
-  public static Gauge gaugeLocalStorageTotalDirsNum;
-  public static Gauge gaugeLocalStorageCorruptedDirsNum;
-  public static Gauge gaugeLocalStorageTotalSpace;
-  public static Gauge gaugeLocalStorageUsedSpace;
-  public static Gauge gaugeLocalStorageUsedSpaceRatio;
+  public static Gauge.Child gaugeLocalStorageTotalDirsNum;
+  public static Gauge.Child gaugeLocalStorageCorruptedDirsNum;
+  public static Gauge.Child gaugeLocalStorageTotalSpace;
+  public static Gauge.Child gaugeLocalStorageUsedSpace;
+  public static Gauge.Child gaugeLocalStorageUsedSpaceRatio;
 
-  public static Gauge gaugeIsHealthy;
-  public static Gauge gaugeAllocatedBufferSize;
-  public static Gauge gaugeInFlushBufferSize;
-  public static Gauge gaugeUsedBufferSize;
-  public static Gauge gaugeReadBufferUsedSize;
-  public static Gauge gaugeWriteHandler;
-  public static Gauge gaugeEventQueueSize;
-  public static Gauge gaugeAppNum;
-  public static Gauge gaugeTotalPartitionNum;
+  public static Gauge.Child gaugeIsHealthy;
+  public static Gauge.Child gaugeAllocatedBufferSize;
+  public static Gauge.Child gaugeInFlushBufferSize;
+  public static Gauge.Child gaugeUsedBufferSize;
+  public static Gauge.Child gaugeReadBufferUsedSize;
+  public static Gauge.Child gaugeWriteHandler;
+  public static Gauge.Child gaugeEventQueueSize;
+  public static Gauge.Child gaugeAppNum;
+  public static Gauge.Child gaugeTotalPartitionNum;
   public static Counter counterRemoteStorageTotalWrite;
   public static Counter counterRemoteStorageRetryWrite;
   public static Counter counterRemoteStorageFailedWrite;
   public static Counter counterRemoteStorageSuccessWrite;
+  private static String tags;
 
   private static MetricsManager metricsManager;
   private static boolean isRegister = false;
 
-  public static synchronized void register(CollectorRegistry collectorRegistry) {
+  public static synchronized void register(CollectorRegistry collectorRegistry, String tags) {
     if (!isRegister) {
       metricsManager = new MetricsManager(collectorRegistry);
       isRegister = true;
@@ -163,7 +165,7 @@ public class ShuffleServerMetrics {
 
   @VisibleForTesting
   public static void register() {
-    register(CollectorRegistry.defaultRegistry);
+    register(CollectorRegistry.defaultRegistry, Constants.SHUFFLE_SERVER_VERSION);
   }
 
   @VisibleForTesting
@@ -182,8 +184,8 @@ public class ShuffleServerMetrics {
       counterLocalStorageRetryWrite.inc();
     } else {
       if (!StringUtils.isEmpty(storageHost)) {
-        counterRemoteStorageTotalWrite.labels(storageHost).inc();
-        counterRemoteStorageRetryWrite.labels(storageHost).inc();
+        counterRemoteStorageTotalWrite.labels(tags, storageHost).inc();
+        counterRemoteStorageRetryWrite.labels(tags, storageHost).inc();
       }
     }
   }
@@ -194,8 +196,8 @@ public class ShuffleServerMetrics {
       counterLocalStorageSuccessWrite.inc();
     } else {
       if (!StringUtils.isEmpty(storageHost)) {
-        counterRemoteStorageTotalWrite.labels(storageHost).inc();
-        counterRemoteStorageSuccessWrite.labels(storageHost).inc();
+        counterRemoteStorageTotalWrite.labels(tags, storageHost).inc();
+        counterRemoteStorageSuccessWrite.labels(tags, storageHost).inc();
       }
     }
   }
@@ -206,73 +208,73 @@ public class ShuffleServerMetrics {
       counterLocalStorageFailedWrite.inc();
     } else {
       if (!StringUtils.isEmpty(storageHost)) {
-        counterRemoteStorageTotalWrite.labels(storageHost).inc();
-        counterRemoteStorageFailedWrite.labels(storageHost).inc();
+        counterRemoteStorageTotalWrite.labels(tags, storageHost).inc();
+        counterRemoteStorageFailedWrite.labels(tags, storageHost).inc();
       }
     }
   }
 
   private static void setUpMetrics() {
-    counterTotalReceivedDataSize = metricsManager.addCounter(TOTAL_RECEIVED_DATA);
-    counterTotalWriteDataSize = metricsManager.addCounter(TOTAL_WRITE_DATA);
-    counterTotalWriteBlockSize = metricsManager.addCounter(TOTAL_WRITE_BLOCK);
-    counterTotalWriteTime = metricsManager.addCounter(TOTAL_WRITE_TIME);
-    counterWriteException = metricsManager.addCounter(TOTAL_WRITE_EXCEPTION);
-    counterWriteSlow = metricsManager.addCounter(TOTAL_WRITE_SLOW);
-    counterWriteTotal = metricsManager.addCounter(TOTAL_WRITE_NUM);
-    counterEventSizeThresholdLevel1 = metricsManager.addCounter(EVENT_SIZE_THRESHOLD_LEVEL1);
-    counterEventSizeThresholdLevel2 = metricsManager.addCounter(EVENT_SIZE_THRESHOLD_LEVEL2);
-    counterEventSizeThresholdLevel3 = metricsManager.addCounter(EVENT_SIZE_THRESHOLD_LEVEL3);
-    counterEventSizeThresholdLevel4 = metricsManager.addCounter(EVENT_SIZE_THRESHOLD_LEVEL4);
-    counterTotalReadDataSize = metricsManager.addCounter(TOTAL_READ_DATA);
-    counterTotalReadLocalDataFileSize = metricsManager.addCounter(TOTAL_READ_LOCAL_DATA_FILE);
-    counterTotalReadLocalIndexFileSize = metricsManager.addCounter(TOTAL_READ_LOCAL_INDEX_FILE);
-    counterTotalReadMemoryDataSize = metricsManager.addCounter(TOTAL_READ_MEMORY_DATA);
-    counterTotalReadTime = metricsManager.addCounter(TOTAL_READ_TIME);
-    counterTotalDroppedEventNum = metricsManager.addCounter(TOTAL_DROPPED_EVENT_NUM);
-    counterTotalFailedWrittenEventNum = metricsManager.addCounter(TOTAL_FAILED_WRITTEN_EVENT_NUM);
-    counterTotalHdfsWriteDataSize = metricsManager.addCounter(TOTAL_HDFS_WRITE_DATA);
-    counterTotalLocalFileWriteDataSize = metricsManager.addCounter(TOTAL_LOCALFILE_WRITE_DATA);
-    counterTotalRequireBufferFailed = metricsManager.addCounter(TOTAL_REQUIRE_BUFFER_FAILED);
+    counterTotalReceivedDataSize = metricsManager.addCounter(TOTAL_RECEIVED_DATA).labels(tags);
+    counterTotalWriteDataSize = metricsManager.addCounter(TOTAL_WRITE_DATA).labels(tags);
+    counterTotalWriteBlockSize = metricsManager.addCounter(TOTAL_WRITE_BLOCK).labels(tags);
+    counterTotalWriteTime = metricsManager.addCounter(TOTAL_WRITE_TIME).labels(tags);
+    counterWriteException = metricsManager.addCounter(TOTAL_WRITE_EXCEPTION).labels(tags);
+    counterWriteSlow = metricsManager.addCounter(TOTAL_WRITE_SLOW).labels(tags);
+    counterWriteTotal = metricsManager.addCounter(TOTAL_WRITE_NUM).labels(tags);
+    counterEventSizeThresholdLevel1 = metricsManager.addCounter(EVENT_SIZE_THRESHOLD_LEVEL1).labels(tags);
+    counterEventSizeThresholdLevel2 = metricsManager.addCounter(EVENT_SIZE_THRESHOLD_LEVEL2).labels(tags);
+    counterEventSizeThresholdLevel3 = metricsManager.addCounter(EVENT_SIZE_THRESHOLD_LEVEL3).labels(tags);
+    counterEventSizeThresholdLevel4 = metricsManager.addCounter(EVENT_SIZE_THRESHOLD_LEVEL4).labels(tags);
+    counterTotalReadDataSize = metricsManager.addCounter(TOTAL_READ_DATA).labels(tags);
+    counterTotalReadLocalDataFileSize = metricsManager.addCounter(TOTAL_READ_LOCAL_DATA_FILE).labels(tags);
+    counterTotalReadLocalIndexFileSize = metricsManager.addCounter(TOTAL_READ_LOCAL_INDEX_FILE).labels(tags);
+    counterTotalReadMemoryDataSize = metricsManager.addCounter(TOTAL_READ_MEMORY_DATA).labels(tags);
+    counterTotalReadTime = metricsManager.addCounter(TOTAL_READ_TIME).labels(tags);
+    counterTotalDroppedEventNum = metricsManager.addCounter(TOTAL_DROPPED_EVENT_NUM).labels(tags);
+    counterTotalFailedWrittenEventNum = metricsManager.addCounter(TOTAL_FAILED_WRITTEN_EVENT_NUM).labels(tags);
+    counterTotalHdfsWriteDataSize = metricsManager.addCounter(TOTAL_HDFS_WRITE_DATA).labels(tags);
+    counterTotalLocalFileWriteDataSize = metricsManager.addCounter(TOTAL_LOCALFILE_WRITE_DATA).labels(tags);
+    counterTotalRequireBufferFailed = metricsManager.addCounter(TOTAL_REQUIRE_BUFFER_FAILED).labels(tags);
     counterTotalRequireBufferFailedForRegularPartition =
-        metricsManager.addCounter(TOTAL_REQUIRE_BUFFER_FAILED_FOR_REGULAR_PARTITION);
+        metricsManager.addCounter(TOTAL_REQUIRE_BUFFER_FAILED_FOR_REGULAR_PARTITION).labels(tags);
     counterTotalRequireBufferFailedForHugePartition =
-        metricsManager.addCounter(TOTAL_REQUIRE_BUFFER_FAILED_FOR_HUGE_PARTITION);
-    counterLocalStorageTotalWrite = metricsManager.addCounter(STORAGE_TOTAL_WRITE_LOCAL);
-    counterLocalStorageRetryWrite = metricsManager.addCounter(STORAGE_RETRY_WRITE_LOCAL);
-    counterLocalStorageFailedWrite = metricsManager.addCounter(STORAGE_FAILED_WRITE_LOCAL);
-    counterLocalStorageSuccessWrite = metricsManager.addCounter(STORAGE_SUCCESS_WRITE_LOCAL);
+        metricsManager.addCounter(TOTAL_REQUIRE_BUFFER_FAILED_FOR_HUGE_PARTITION).labels(tags);
+    counterLocalStorageTotalWrite = metricsManager.addCounter(STORAGE_TOTAL_WRITE_LOCAL).labels(tags);
+    counterLocalStorageRetryWrite = metricsManager.addCounter(STORAGE_RETRY_WRITE_LOCAL).labels(tags);
+    counterLocalStorageFailedWrite = metricsManager.addCounter(STORAGE_FAILED_WRITE_LOCAL).labels(tags);
+    counterLocalStorageSuccessWrite = metricsManager.addCounter(STORAGE_SUCCESS_WRITE_LOCAL).labels(tags);
     counterRemoteStorageTotalWrite = metricsManager.addCounter(STORAGE_TOTAL_WRITE_REMOTE, STORAGE_HOST_LABEL);
     counterRemoteStorageRetryWrite = metricsManager.addCounter(STORAGE_RETRY_WRITE_REMOTE, STORAGE_HOST_LABEL);
     counterRemoteStorageFailedWrite = metricsManager.addCounter(STORAGE_FAILED_WRITE_REMOTE, STORAGE_HOST_LABEL);
     counterRemoteStorageSuccessWrite = metricsManager.addCounter(STORAGE_SUCCESS_WRITE_REMOTE, STORAGE_HOST_LABEL);
-    counterTotalRequireReadMemoryNum = metricsManager.addCounter(TOTAL_REQUIRE_READ_MEMORY);
-    counterTotalRequireReadMemoryRetryNum = metricsManager.addCounter(TOTAL_REQUIRE_READ_MEMORY_RETRY);
-    counterTotalRequireReadMemoryFailedNum = metricsManager.addCounter(TOTAL_REQUIRE_READ_MEMORY_FAILED);
+    counterTotalRequireReadMemoryNum = metricsManager.addCounter(TOTAL_REQUIRE_READ_MEMORY).labels(tags);
+    counterTotalRequireReadMemoryRetryNum = metricsManager.addCounter(TOTAL_REQUIRE_READ_MEMORY_RETRY).labels(tags);
+    counterTotalRequireReadMemoryFailedNum = metricsManager.addCounter(TOTAL_REQUIRE_READ_MEMORY_FAILED).labels(tags);
 
-    counterTotalAppNum = metricsManager.addCounter(TOTAL_APP_NUM);
-    counterTotalAppWithHugePartitionNum = metricsManager.addCounter(TOTAL_APP_WITH_HUGE_PARTITION_NUM);
-    counterTotalPartitionNum = metricsManager.addCounter(TOTAL_PARTITION_NUM);
-    counterTotalHugePartitionNum = metricsManager.addCounter(TOTAL_HUGE_PARTITION_NUM);
+    counterTotalAppNum = metricsManager.addCounter(TOTAL_APP_NUM).labels(tags);
+    counterTotalAppWithHugePartitionNum = metricsManager.addCounter(TOTAL_APP_WITH_HUGE_PARTITION_NUM).labels(tags);
+    counterTotalPartitionNum = metricsManager.addCounter(TOTAL_PARTITION_NUM).labels(tags);
+    counterTotalHugePartitionNum = metricsManager.addCounter(TOTAL_HUGE_PARTITION_NUM).labels(tags);
 
-    gaugeLocalStorageTotalDirsNum = metricsManager.addGauge(LOCAL_STORAGE_TOTAL_DIRS_NUM);
-    gaugeLocalStorageCorruptedDirsNum = metricsManager.addGauge(LOCAL_STORAGE_CORRUPTED_DIRS_NUM);
-    gaugeLocalStorageTotalSpace = metricsManager.addGauge(LOCAL_STORAGE_TOTAL_SPACE);
-    gaugeLocalStorageUsedSpace = metricsManager.addGauge(LOCAL_STORAGE_USED_SPACE);
-    gaugeLocalStorageUsedSpaceRatio = metricsManager.addGauge(LOCAL_STORAGE_USED_SPACE_RATIO);
+    gaugeLocalStorageTotalDirsNum = metricsManager.addGauge(LOCAL_STORAGE_TOTAL_DIRS_NUM).labels(tags);
+    gaugeLocalStorageCorruptedDirsNum = metricsManager.addGauge(LOCAL_STORAGE_CORRUPTED_DIRS_NUM).labels(tags);
+    gaugeLocalStorageTotalSpace = metricsManager.addGauge(LOCAL_STORAGE_TOTAL_SPACE).labels(tags);
+    gaugeLocalStorageUsedSpace = metricsManager.addGauge(LOCAL_STORAGE_USED_SPACE).labels(tags);
+    gaugeLocalStorageUsedSpaceRatio = metricsManager.addGauge(LOCAL_STORAGE_USED_SPACE_RATIO).labels(tags);
 
-    gaugeIsHealthy = metricsManager.addGauge(IS_HEALTHY);
-    gaugeAllocatedBufferSize = metricsManager.addGauge(ALLOCATED_BUFFER_SIZE);
-    gaugeInFlushBufferSize = metricsManager.addGauge(IN_FLUSH_BUFFER_SIZE);
-    gaugeUsedBufferSize = metricsManager.addGauge(USED_BUFFER_SIZE);
-    gaugeReadBufferUsedSize = metricsManager.addGauge(READ_USED_BUFFER_SIZE);
-    gaugeWriteHandler = metricsManager.addGauge(TOTAL_WRITE_HANDLER);
-    gaugeEventQueueSize = metricsManager.addGauge(EVENT_QUEUE_SIZE);
-    gaugeAppNum = metricsManager.addGauge(APP_NUM_WITH_NODE);
-    gaugeTotalPartitionNum = metricsManager.addGauge(PARTITION_NUM_WITH_NODE);
+    gaugeIsHealthy = metricsManager.addGauge(IS_HEALTHY).labels(tags);
+    gaugeAllocatedBufferSize = metricsManager.addGauge(ALLOCATED_BUFFER_SIZE).labels(tags);
+    gaugeInFlushBufferSize = metricsManager.addGauge(IN_FLUSH_BUFFER_SIZE).labels(tags);
+    gaugeUsedBufferSize = metricsManager.addGauge(USED_BUFFER_SIZE).labels(tags);
+    gaugeReadBufferUsedSize = metricsManager.addGauge(READ_USED_BUFFER_SIZE).labels(tags);
+    gaugeWriteHandler = metricsManager.addGauge(TOTAL_WRITE_HANDLER).labels(tags);
+    gaugeEventQueueSize = metricsManager.addGauge(EVENT_QUEUE_SIZE).labels(tags);
+    gaugeAppNum = metricsManager.addGauge(APP_NUM_WITH_NODE).labels(tags);
+    gaugeTotalPartitionNum = metricsManager.addGauge(PARTITION_NUM_WITH_NODE).labels(tags);
 
-    gaugeHugePartitionNum = metricsManager.addGauge(HUGE_PARTITION_NUM);
-    gaugeAppWithHugePartitionNum = metricsManager.addGauge(APP_WITH_HUGE_PARTITION_NUM);
+    gaugeHugePartitionNum = metricsManager.addGauge(HUGE_PARTITION_NUM).labels(tags);
+    gaugeAppWithHugePartitionNum = metricsManager.addGauge(APP_WITH_HUGE_PARTITION_NUM).labels(tags);
   }
 
 }
